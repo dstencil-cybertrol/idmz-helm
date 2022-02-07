@@ -1,0 +1,90 @@
+{{ if has "dnsmasq" .Values.components }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-dnsmasq-service-tcp
+  namespace: {{ .Release.Namespace }}
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  {{- end }}
+  {{- if eq .Values.kubernetes.networking "NodePort" }}
+  type: NodePort
+  {{- end }}
+  ports:
+    - name: dnstcp
+      protocol: TCP
+      port: 53
+      targetPort: 53
+  selector:
+    app: {{ .Release.Name }}-dnsmasq
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-dnsmasq-service-udp
+  namespace: {{ .Release.Namespace }}
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  {{- end }}
+  {{- if eq .Values.kubernetes.networking "NodePort" }}
+  type: NodePort
+  {{- end }}
+  ports:
+    - name: dnstcp
+      protocol: UDP
+      port: 53
+      targetPort: 53
+  selector:
+    app: {{ .Release.Name }}-dnsmasq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-dnsmasq-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-dnsmasq
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-dnsmasq
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-dnsmasq-container
+          image: alphabet5/dnsmasq:{{ .Values.dnsmasq.version }}
+          imagePullPolicy: Always
+          args:
+            {{- range .Values.dnsmasq.args }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 53
+              protocol: UDP
+          readinessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 20
+{{ end }}

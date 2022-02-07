@@ -1,0 +1,85 @@
+{{ if has "squid" .Values.components }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-squid-service
+  namespace: {{ .Release.Namespace }}
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  {{- end }}
+  {{- if eq .Values.kubernetes.networking "NodePort" }}
+  type: NodePort
+  {{- end }}
+  ports: 
+    - name: proxy
+      protocol: TCP
+      port: 3128
+      targetPort: 3128
+  selector:
+    app: {{ .Release.Name }}-squid
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-squid-conf-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  squid.conf: |
+{{ tpl .Values.squid.cfg . | indent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-squid-deployment
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-squid
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-squid
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-squid-container
+          image: alphabet5/squid:{{ .Values.squid.version }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3128
+              protocol: TCP
+          volumeMounts:
+            - name: {{ .Release.Name }}-squid-conf-volume
+              mountPath: "/etc/squid/squid.conf"
+              subPath: "squid.conf"
+          startupProbe:
+            tcpSocket:
+              port: 3128
+            failureThreshold: 30
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 3128
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 3128
+            initialDelaySeconds: 0
+            periodSeconds: 1
+      volumes:
+        - name: {{ .Release.Name }}-squid-conf-volume
+          configMap:
+            name: {{ .Release.Name }}-squid-conf-configmap
+{{ end }}

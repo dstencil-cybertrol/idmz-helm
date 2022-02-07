@@ -1,0 +1,212 @@
+{{ if has "guacamole" .Values.components }}
+# Shared Folder PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-guac-shared-persistent-storage
+  namespace: {{ .Release.Namespace }}
+spec:
+  # access mode:
+  # - ReadWriteMany (RW from multi nodes)
+  # - ReadWriteOnce (RW from a node)
+  # - ReadOnlyMany (R from multi nodes)
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.kubernetes.storage }}
+  resources:
+    requests:
+      storage: {{ .Values.guacamole.shared_volume_size }}
+---
+# Guacd service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-guacd-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 4822
+      targetPort: 4822
+  selector:
+    app: guacd
+---
+# Guacd deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name}}-guacd-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-guacd
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-guacd
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ .Release.Name }}-guacd-container
+          image: guacamole/guacd
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4822
+          startupProbe:
+            tcpSocket:
+              port: 4822
+            failureThreshold: 45
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 4822
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 4822
+            initialDelaySeconds: 0
+            periodSeconds: 1
+---
+# Guacamole properties configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-guacamole-properties-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  guacamole.properties: |
+{{ tpl .Values.guacamole.properties . | indent 4 }}
+---
+{{ if .Values.guacamole.debug }}
+# Guacamole logback.xml for more details in the logs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-guacamole-logback-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  logback.xml: |
+    <configuration>
+
+        <!-- Appender for debugging -->
+        <appender name="GUAC-DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- Log at DEBUG level -->
+        <root level="debug">
+            <appender-ref ref="GUAC-DEBUG"/>
+        </root>
+
+    </configuration>
+---
+{{ end }}
+# Guacamole service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-guacamole-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: guacamole
+---
+# Guacamole deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-guacamole-deployment
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-guacamole
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-guacamole
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ .Release.Name }}-guacamole-container
+          image: guacamole/guacamole:{{ .Values.guacamole.version }}
+          imagePullPolicy: Always
+          command:
+            - "/bin/bash"
+            - "-c"
+            - >
+              sed -i 's#      </Host>#        <Valve className="org.apache.catalina.valves.RemoteIpValve"\n               internalProxies=".*"\n               remoteIpHeader="x-forwarded-for"\n               remoteIpProxiesHeader="x-forwarded-by"\n               protocolHeader="x-forwarded-proto" />\n      </Host>#' /usr/local/tomcat/conf/server.xml; mkdir /etc/guacamole; mkdir /etc/guacamole/extensions; cp /opt/guacamole/ldap/guacamole-auth-ldap-*.jar /etc/guacamole/extensions; exec /opt/guacamole/bin/start.sh
+          env:
+            - name: MYSQL_USER
+              value: {{ .Values.mysql.mysql_username }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-secret
+                  key: mysql_password
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mysql.mysql_database }}
+            - name: GUACD_HOSTNAME
+              value: {{ .Release.Name }}-guacd-service
+            - name: MYSQL_HOSTNAME
+              value: {{ .Release.Name }}-guac-mysql-service
+            - name: GUACAMOLE_HOME
+              value: /etc/guacamole
+          ports:
+            - name: guacamole
+              containerPort: 8080
+          volumeMounts:
+            - name: {{ .Release.Name }}-guacamole-properties-volume
+              mountPath: "/etc/guacamole/guacamole.properties"
+              subPath: "guacamole.properties"
+            {{- if .Values.guacamole.debug }}
+            - name: {{ .Release.Name }}-guacamole-logback-volume
+              mountPath: "/etc/guacamole/logback.xml"
+              subPath: "logback.xml"
+            {{- end }}
+            - name: {{ .Release.Name }}-guac-shared-persistent-storage-volume
+              mountPath: "/shared/"
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            failureThreshold: 45
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 1
+      volumes:
+        - name: {{ .Release.Name }}-guacamole-properties-volume
+          configMap:
+            name: {{ .Release.Name }}-guacamole-properties-configmap
+        {{- if .Values.guacamole.debug }}
+        - name: {{ .Release.Name }}-guacamole-logback-volume
+          configMap:
+            name: {{ .Release.Name }}-guacamole-logback-configmap
+        {{- end }}
+        - name: {{ .Release.Name }}-guac-shared-persistent-storage-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-guac-shared-persistent-storage
+{{ end }}

@@ -1,0 +1,166 @@
+{{ if has "guacamole" .Values.components }}
+# MySQL PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-guac-mysql-persistent-storage
+  namespace: {{ .Release.Namespace }}
+spec:
+  # access mode:
+  # - ReadWriteMany (RW from multi nodes)
+  # - ReadWriteOnce (RW from a node)
+  # - ReadOnlyMany (R from multi nodes)
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.kubernetes.storage }}
+  resources:
+    requests:
+      storage: {{ .Values.guacamole.db_volume_size }}
+---
+# MySQL ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-mysql-init-script-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  initdb.sh: |
+    #!/bin/bash
+    # Initialize MySQL database.
+    # Add this into the container via mount point.
+    # This should be in the same folder as the guacamole initdb.sql.script file.
+    # This file is executed before initdb.sql.script as files are executed in alphabetical order.
+    while ! mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping -hlocalhost --silent; do
+        sleep 1
+    done
+    sleep 1
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD --force -e "FLUSH PRIVILEGES;" || true
+    # Not required since it's created by the entrypoint with the env. mysql -uroot -p$MYSQL_ROOT_PASSWORD --force -e "CREATE DATABASE $MYSQL_DATABASE;" || true
+    # I don't think this is required? mysql -uroot -p$MYSQL_ROOT_PASSWORD --force -e "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$MYSQL_PASSWORD';" || true
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD --force -e "GRANT SELECT,INSERT,UPDATE,DELETE ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';" || true
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD --force -e "FLUSH PRIVILEGES;" || true
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD --force $MYSQL_DATABASE < /mysqlinit/initdb.sql || true
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD --force -e "USE $MYSQL_DATABASE; SET @salt = UNHEX(SHA2(UUID(), 256));INSERT INTO guacamole_entity (name, type) VALUES ('guacadmin', 'USER') ON DUPLICATE KEY UPDATE name='guacadmin', type='USER';INSERT INTO guacamole_user (entity_id,password_salt,password_hash,password_date) SELECT entity_id,@salt,UNHEX(SHA2(CONCAT('$GUACADMIN_PASSWORD', HEX(@salt)), 256)),CURRENT_TIMESTAMP FROM guacamole_entity WHERE name = 'guacadmin' AND type = 'USER' ON DUPLICATE KEY UPDATE password_salt=@salt,password_hash=UNHEX(SHA2(CONCAT('$GUACADMIN_PASSWORD', HEX(@salt)), 256)),password_date=CURRENT_TIMESTAMP;" || true
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-guac-mysql-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  selector:
+    app: mysql
+---
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mysql-deployment
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      restartPolicy: Always
+      initContainers:
+        - name: {{ .Release.Name }}-mysql-init-container
+          image: guacamole/guacamole:{{ .Values.guacamole.version }}
+          command:
+            - '/bin/bash'
+            - '-c'
+            - '/opt/guacamole/bin/initdb.sh --mysql > /mysqlinit/initdb.sql'
+          volumeMounts:
+            - name: {{ .Release.Name }}-mysql-init-sql-script-volume
+              mountPath: "/mysqlinit/"
+      containers:
+        - name: mysql-container-name
+          image: mariadb
+          imagePullPolicy: Always
+          env:
+            - name: MYSQL_USER
+              value: {{ .Values.mysql.mysql_username }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-secret
+                  key: mysql_password
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mysql.mysql_database }}
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-secret
+                  key: mysql_root_password
+            - name: GUACADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-secret
+                  key: guacadmin_password
+          ports:
+            - name: mysql
+              containerPort: 3306
+          volumeMounts:
+            - name: {{ .Release.Name }}-mysql-init-sql-script-volume
+              mountPath: "/mysqlinit/"
+            - name: {{ .Release.Name }}-mysql-init-script-volume
+              mountPath: "/docker-entrypoint-initdb.d/initdb.sh"
+              subPath: "initdb.sh"
+          startupProbe:
+            exec:
+              command:
+                - 'mysqladmin'
+                - 'ping'
+                - '-h'
+                - 'localhost'
+            failureThreshold: 60
+            periodSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - 'mysqladmin'
+                - 'ping'
+                - '-h'
+                - 'localhost'
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - 'mysqladmin'
+                - 'ping'
+                - '-h'
+                - 'localhost'
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      volumes:
+        - name: {{ .Release.Name }}-mysql-init-script-volume
+          configMap:
+            name: {{ .Release.Name }}-mysql-init-script-configmap
+        - name: {{ .Release.Name }}-mysql-init-sql-script-volume
+          emptyDir: {}
+        - name: {{ .Release.Name }}-guac-mysql-persistent-storage-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-guac-mysql-persistent-storage
+{{ end }}

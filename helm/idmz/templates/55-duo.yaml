@@ -1,0 +1,87 @@
+{{ if has "duo" .Values.components }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-duo-auth-proxy-service
+  namespace: {{ .Release.Namespace }}
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  {{- end }}
+  {{- if eq .Values.kubernetes.networking "NodePort" }}
+  type: NodePort
+  {{- end }}
+  ports: 
+    - name: radius
+      protocol: UDP
+      port: 1812
+      targetPort: 1812
+  selector:
+    app: {{ .Release.Name }}-duo-auth-proxy
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-duo-auth-proxy-deployment
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-duo-auth-proxy
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-duo-auth-proxy
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-duo-auth-proxy-container
+          image: alphabet5/duoauthproxy:{{ .Values.duo.version }}
+          imagePullPolicy: Always
+          env:
+            - name: DUO_AD_HOST
+              value: {{ .Values.duo.duo_ad_host }}
+            - name: DUO_AD_USER
+              value: {{ .Values.duo.duo_ad_user }}
+            - name: DUO_AD_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-duo-secret
+                  key: duo_ad_password
+            - name: DUO_AD_SEARCH_DN
+              value: {{ tpl .Values.duo.duo_ad_search_dn . }}
+            - name: DUO_INTEGRATION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-duo-secret
+                  key: duo_integration_key
+            - name: DUO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-duo-secret
+                  key: duo_secret_key
+            - name: DUO_API_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-duo-secret
+                  key: duo_api_hostname
+            - name: DUO_RADIUS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-duo-secret
+                  key: duo_radius_secret
+            - name: DUO_FAILMODE
+              value: {{ .Values.duo.duo_failmode }}
+            - name: DUO_PORT
+              value: "1812"
+          ports:
+            - containerPort: 1812
+              protocol: UDP
+{{ end }}

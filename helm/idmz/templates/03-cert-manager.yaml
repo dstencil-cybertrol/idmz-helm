@@ -1,0 +1,41 @@
+{{ if has "cert_manager" .Values.components }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ .Release.Name }}-letsencrypt
+  namespace: {{ .Release.Namespace }}
+spec:
+  acme:
+    # You must replace this email address with your own.
+    # Let's Encrypt will use this to contact you about expiring
+    # certificates, and issues related to your account.
+    email: {{ .Values.cert_manager.email }}
+    server: {{ .Values.cert_manager.server }}
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: {{ .Release.Name }}-letsencrypt-private-key
+    # Add a single challenge solver, HTTP01 using nginx
+    solvers:
+      - selector: {}
+        dns01:
+          route53:
+            region: {{ .Values.cert_manager.route53_region }}
+            accessKeyID: {{ .Values.cert_manager.route53_access_key_id }}
+            secretAccessKeySecretRef:
+              name: {{ .Release.Name }}-route53
+              key: secret_access_key
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-cert-renewal
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: {{ .Release.Name }}-haproxy-app-tls
+  issuerRef:
+    name: {{ .Release.Name }}-letsencrypt
+  dnsNames: 
+    {{- range .Values.cert_manager.dnsNames }}
+    - {{ . | quote }}
+    {{- end }}
+{{ end }}

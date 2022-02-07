@@ -1,0 +1,93 @@
+{{ if has "guacamole_users" .Values.components }}
+# Guacamole users configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-guacamole-users-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  manual-connections.yaml: |
+{{ tpl .Values.guacamole_users.manual_connections . | indent 4 }}
+  auto-connections.yaml: |
+{{ tpl .Values.guacamole_users.auto_connections . | indent 4 }}
+---
+# Guacamole users deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-guacamole-users-deployment
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-guacamole-users
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-guacamole-users
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ .Release.Name }}-guacamole-users-container
+          image: alphabet5/guacamole-users:{{ .Values.guacamole_users.version }}
+          imagePullPolicy: Always
+          env:
+            - name: LOGGING_LOCALS
+              value: {{ .Values.guacamole_users.log_locals | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.mysql.mysql_username | quote }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-secret
+                  key: mysql_password
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mysql.mysql_database | quote }}
+            - name: MYSQL_HOSTNAME
+              value: {{ .Release.Name }}-guac-mysql-service
+            - name: LDAP_SEARCH_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-ldap-secret
+                  key: ldap_password
+            - name: CFG_AUTO_CONNECTION_DNS
+              value: {{ .Values.guacamole_users.auto_connection_dns | quote }}
+            - name: CFG_AUTO_CONNECTION_DNS_RESOLVER
+              value: {{ .Values.guacamole_users.auto_connection_dns_resolvers | quote }}
+            - name: GUAC_ADMIN_GROUPS
+              value: {{ .Values.guacamole_users.guac_admin_groups | quote }}
+            - name: LDAP_COMPUTER_BASE_DN
+              value: {{ tpl .Values.guacamole_users.ldap_computer_base_dn . | quote }}
+            - name: LDAP_COMPUTER_FILTER
+              value: {{ .Values.guacamole_users.ldap_computer_filter | quote }}
+            - name: LDAP_GROUP_NAME_FROM_CONN_NAME_REGEX
+              value: {{ .Values.guacamole_users.ldap_group_name_from_conn_name_regex | quote }}
+            - name: LDAP_GROUP_NAME_MOD
+              value: {{ .Values.guacamole_users.ldap_group_name_mod | quote }}
+            - name: REFRESH_SPEED
+              value: {{ .Values.guacamole_users.refresh_speed | quote }}
+            - name: MANUAL_ONLY
+              value: {{ .Values.guacamole_users.manual_only | quote }}
+          volumeMounts:
+            - name: {{ .Release.Name }}-guacamole-users-volume
+              mountPath: "/configs/manual-connections.yaml"
+              subPath: "manual-connections.yaml"
+            - name: {{ .Release.Name }}-guacamole-users-volume
+              mountPath: "/configs/auto-connections.yaml"
+              subPath: "auto-connections.yaml"
+            - name: {{ .Release.Name }}-guacamole-properties-volume
+              mountPath: "/configs/guacamole.properties"
+              subPath: "guacamole.properties"
+      volumes:
+        - name: {{ .Release.Name }}-guacamole-users-volume
+          configMap:
+            name: {{ .Release.Name }}-guacamole-users-configmap
+        - name: {{ .Release.Name }}-guacamole-properties-volume
+          configMap:
+            name: {{ .Release.Name }}-guacamole-properties-configmap
+{{ end }}

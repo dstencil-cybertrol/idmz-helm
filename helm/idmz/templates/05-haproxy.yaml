@@ -1,0 +1,93 @@
+{{ if has "haproxy" .Values.components }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-haproxy-service
+  namespace: {{ .Release.Namespace }}
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  {{- if eq .Values.kubernetes.networking "MetalLB" }}
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  {{- end }}
+  {{- if eq .Values.kubernetes.networking "NodePort" }}
+  type: NodePort
+  {{- end }}
+  ports: 
+    {{- range .Values.haproxy.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{.targetPort }}
+    {{- end }}
+  selector:
+    app: {{ .Release.Name }}-haproxy
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-haproxy-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  haproxy.cfg: |
+{{ tpl .Values.haproxy.cfg . | indent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-haproxy-deployment
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-haproxy
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-haproxy
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-haproxy-container
+          image: haproxy:{{ .Values.haproxy.version }}
+          imagePullPolicy: Always
+          ports:
+            {{- range .Values.haproxy.ports }}
+            - containerPort: {{ .targetPort }}
+            {{- end }}
+          volumeMounts:
+            - name: {{ .Release.Name }}-haproxy-volume
+              mountPath: "/usr/local/etc/haproxy/haproxy.cfg"
+              subPath: "haproxy.cfg"
+            - name: {{ .Release.Name }}-haproxy-certs-volume
+              mountPath: "/usr/local/etc/certs/"
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 1
+      volumes:
+        - name: {{ .Release.Name }}-haproxy-volume
+          configMap:
+            name: {{ .Release.Name }}-haproxy-configmap
+        - name: {{ .Release.Name }}-haproxy-certs-volume
+          secret:
+            secretName: {{ .Release.Name }}-haproxy-app-tls
+{{ end }}

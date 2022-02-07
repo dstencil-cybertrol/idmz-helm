@@ -1,0 +1,219 @@
+kubernetes:
+  storage: openebs-jiva-csi-default # use openebs-jiva-csi-default if using a multi-node cluster, obenebs-hostpath for single-node cluster.
+  networking: MetalLB # use MetalLB for a multi-node cluster, NodePort for single-node cluster.
+  metallb_ip: 192.168.1.156 # Used if netowrking is MetalLB
+global:
+  default_domain: 'domain.com'
+  default_domain_ldap: 'DC=domain,DC=com'
+  default_dns: 'guac.demo.example.com'
+secrets:
+  "{{ .Release.Name }}-mysql-secret":
+    mysql_password: AgAn93ngGKTs1g20581OpLk9z++2OqgB0tTyHQEtZhGAPxbNEXdcBLooiYZ7E9Lnl6DYU5gHac5o07Ahp/AM3Wmiy9El4tSwDZwiJkG6dNnUAuJk1zw2cnHPSD7FmJC7uFs57FZJTj/powRVlRNH3lZASNScH+OMKTx7n2yWtMMA7AsVkKfIVSXxUIP/6RFMlW8UTfd0yP08VQns6jgFvtsdJDakSC2SyuCW47E1tBUI+hpxLNt+7rUx5VX+7B4G2dHLX7m6w3ZNon+2AtbzWKswL0KZR3frC9WMeWINnL76R4d9tumAZ/lseP+XpYz31tUgmwURE3DHPG+EH0prjgwjbHigmhFS6MGRkhHH1igAbBcXsgYJbmw2iYKdwe/SPObcnU5j9HFBpvCwFN7r7hoQdXT5MIwOnD0WkKuL1yF8d7pA46XlFMk/Rq64JdK2C/YGHavbTu9EEpqeW92bsm9/AddAo0CYPh2bUIHFlxetq6F/CMKXlnwdFR/4RyT2gI9X6RPcZGBb1X+Sa10syd7P+N+TONI4eelyMVxjHsvjcGuNSCSL/lvutKYXcKFPY4rmWRfGPPuRemxDbJgCOxZWF0Tm2SpirRhO+OLSRNKwpfeH0a5Mra7J10vOcq+ucJwqGGajMTTErINaY2Xu1xpjfuoLOmMoCeS05LfBgtdkwQC14FkaRAx2gwINbWRPS+0SaBCQMKePTQ==
+    mysql_root_password: AgAn93ngGKTs1g20581OpLk9z++2OqgB0tTyHQEtZhGAPxbNEXdcBLooiYZ7E9Lnl6DYU5gHac5o07Ahp/AM3Wmiy9El4tSwDZwiJkG6dNnUAuJk1zw2cnHPSD7FmJC7uFs57FZJTj/powRVlRNH3lZASNScH+OMKTx7n2yWtMMA7AsVkKfIVSXxUIP/6RFMlW8UTfd0yP08VQns6jgFvtsdJDakSC2SyuCW47E1tBUI+hpxLNt+7rUx5VX+7B4G2dHLX7m6w3ZNon+2AtbzWKswL0KZR3frC9WMeWINnL76R4d9tumAZ/lseP+XpYz31tUgmwURE3DHPG+EH0prjgwjbHigmhFS6MGRkhHH1igAbBcXsgYJbmw2iYKdwe/SPObcnU5j9HFBpvCwFN7r7hoQdXT5MIwOnD0WkKuL1yF8d7pA46XlFMk/Rq64JdK2C/YGHavbTu9EEpqeW92bsm9/AddAo0CYPh2bUIHFlxetq6F/CMKXlnwdFR/4RyT2gI9X6RPcZGBb1X+Sa10syd7P+N+TONI4eelyMVxjHsvjcGuNSCSL/lvutKYXcKFPY4rmWRfGPPuRemxDbJgCOxZWF0Tm2SpirRhO+OLSRNKwpfeH0a5Mra7J10vOcq+ucJwqGGajMTTErINaY2Xu1xpjfuoLOmMoCeS05LfBgtdkwQC14FkaRAx2gwINbWRPS+0SaBCQMKePTQ==
+    guacadmin_password: AgAn93ngGKTs1g20581OpLk9z++2OqgB0tTyHQEtZhGAPxbNEXdcBLooiYZ7E9Lnl6DYU5gHac5o07Ahp/AM3Wmiy9El4tSwDZwiJkG6dNnUAuJk1zw2cnHPSD7FmJC7uFs57FZJTj/powRVlRNH3lZASNScH+OMKTx7n2yWtMMA7AsVkKfIVSXxUIP/6RFMlW8UTfd0yP08VQns6jgFvtsdJDakSC2SyuCW47E1tBUI+hpxLNt+7rUx5VX+7B4G2dHLX7m6w3ZNon+2AtbzWKswL0KZR3frC9WMeWINnL76R4d9tumAZ/lseP+XpYz31tUgmwURE3DHPG+EH0prjgwjbHigmhFS6MGRkhHH1igAbBcXsgYJbmw2iYKdwe/SPObcnU5j9HFBpvCwFN7r7hoQdXT5MIwOnD0WkKuL1yF8d7pA46XlFMk/Rq64JdK2C/YGHavbTu9EEpqeW92bsm9/AddAo0CYPh2bUIHFlxetq6F/CMKXlnwdFR/4RyT2gI9X6RPcZGBb1X+Sa10syd7P+N+TONI4eelyMVxjHsvjcGuNSCSL/lvutKYXcKFPY4rmWRfGPPuRemxDbJgCOxZWF0Tm2SpirRhO+OLSRNKwpfeH0a5Mra7J10vOcq+ucJwqGGajMTTErINaY2Xu1xpjfuoLOmMoCeS05LfBgtdkwQC14FkaRAx2gwINbWRPS+0SaBCQMKePTQ==
+  "{{ .Release.Name }}-ldap-secret":
+    ldap_password: AgBGYyKMkcj/lUjavfp+rYJDwaBDYKgD0YUUj2UtGuscO+QbSfsaTzXwj6WE0g5flmCZ0TsUBGJ6I0yGt1Nf1vtUgTfjW/hJGtfn4XdzUQ39dmTo5Dl5UluqEqtw6Rin8ves3MEwkcU3w1egOD4EhRfYGofILVpDqBu4g65ipvoSOqpAndGNLr4h0RrHCRj42uApSBB3D/fNsw3GBYDEexAmWSb2nQr6uYcMluWGXwNhN+wsoSWPbx6s+YkBl+jsCqJmuL167YHTM+k6Bia2MThQsiWxsndpXEzJQ6jgLotGVNjgjVGBkiufsQklphVHFuJOprxvLyt+12moOMb5Q0xmIjagRqPoX2z8KK+vlzrAGwB4cZ65M0uXUIcRii8zYzpgNmWLOGRwMQNSDP3fuh+ymJzGF02LXtCEWjSIWS1Jqkwyub4/bbGYM5Ez+CXoOicG+aO9jHyJS5lOoLBKQe0+p3orWer6SEIXtzinx2HK1WWruLTuG9deB1ZlkEMVmV3facwFB1S/zv4/e5u2qeej+Ovk/jA/j3n6uP1FjKzZMvKU2Px/KG3TZ1XGEymDWr74KR45mcSeZpzEtavQiEqNeKUbYugNsq4fo/ZDYS3p/bDzPKJNOWHWS3MSRZhL/PtyF4LJSmmsBmeCHtzTgk/NUVKZJmzBSdG8TYOuXDtnW0LS/ZF6r6mOmV9ayaxlC8YADOt0IVoBv2mNfXZA
+  "{{ .Release.Name }}-duo-secret":
+    duo_ad_password: AgBGYyKMkcj/lUjavfp+rYJDwaBDYKgD0YUUj2UtGuscO+QbSfsaTzXwj6WE0g5flmCZ0TsUBGJ6I0yGt1Nf1vtUgTfjW/hJGtfn4XdzUQ39dmTo5Dl5UluqEqtw6Rin8ves3MEwkcU3w1egOD4EhRfYGofILVpDqBu4g65ipvoSOqpAndGNLr4h0RrHCRj42uApSBB3D/fNsw3GBYDEexAmWSb2nQr6uYcMluWGXwNhN+wsoSWPbx6s+YkBl+jsCqJmuL167YHTM+k6Bia2MThQsiWxsndpXEzJQ6jgLotGVNjgjVGBkiufsQklphVHFuJOprxvLyt+12moOMb5Q0xmIjagRqPoX2z8KK+vlzrAGwB4cZ65M0uXUIcRii8zYzpgNmWLOGRwMQNSDP3fuh+ymJzGF02LXtCEWjSIWS1Jqkwyub4/bbGYM5Ez+CXoOicG+aO9jHyJS5lOoLBKQe0+p3orWer6SEIXtzinx2HK1WWruLTuG9deB1ZlkEMVmV3facwFB1S/zv4/e5u2qeej+Ovk/jA/j3n6uP1FjKzZMvKU2Px/KG3TZ1XGEymDWr74KR45mcSeZpzEtavQiEqNeKUbYugNsq4fo/ZDYS3p/bDzPKJNOWHWS3MSRZhL/PtyF4LJSmmsBmeCHtzTgk/NUVKZJmzBSdG8TYOuXDtnW0LS/ZF6r6mOmV9ayaxlC8YADOt0IVoBv2mNfXZA
+    duo_api_hostname: AgAJEwM/xx1sjZk9Q5/2UVoN+vE7M5K/mUwBDDSuSz44jzjKYi7pz2Ik+kSVO6oqoYPMeQJv9mEQj6RkAiWkbmWHJFlKoroP0gfKhhLpju9MYYgKh1uDdWZO6s0LuyfxhY3srIo4nOXxBb1taqcC84PuQB64UHW/1dCPFy1WCm3+tFZgO8Sna4FNW3U0Z7rvkzZBW/WgOWZqKf30Q1DB0/SBx42T7IAcsGs7jY5F/xzuZM2POyB5s5xK7XGL1BQqgQPM8OoEjf/hEe+5iU+LFOh7Vg0B9fs1/aboYQvVCa3CXhESOUGXknkyXSMC7JtovXIva/u/aVZzLmrlETu0EpmWtDxfOxTXMmb4/UNXjaOU26HRHnzx8wQHTTd1M8uvT4NJMQHZGjH5zzNEcXYfCIzllPunhfDIttB2KcwH+7FcfLaESHWpTEA802ITCZczCVabXUhso9yI7N+zEkhWOekNnp74XWCXeP0IPKhUQY/4XgsTCXtTVKK20ISdCuak9OKL6ipAj8HiAMgoaybBlj6DxJ6P3cxjioU/od56iohjsrBIvkjnZSWj7MHUIUkn1eN5u9NooIYHxE0gMEZDegJ+Iz0NovCiy+pdNVRP05Of11S+/Ud9T8yWIV2e/pokhfCT/KPm0n/TEtppds7mtjvyEjXJ32VUqL4BFO1K2q303rJ4Ig9vs6lTBgJC+EMuVF8FHxbe6EgCN9HXSZn2vajyujqGtixQDFwYKMXq
+    duo_integration_key: AgABkt8pC4VWk9jpOuw1JKLWU+DUakUVfx0p8xMF4tok/7b1oNsDWgDOUpP1UVyGYo4mwfKwpWbRS1ocrgxfa9uaI5sKmcK2tzFrA8ecnRyrG20Yr5fsJh2JI7zAuE6FCZE14UJUeaObTKqzkxV4XeFptmMJ5Er2AA30MuGZ+LZ76uRCr1VvQ01sGySyzXs4TzkvjMmjd+re+lY5xokhCWZL1MDGWvuBEYkNufibpp5XrO85KsCgl4XDmnLJpzQQPFhKT7Yn4HkRBpffEonescK0lybyTHRdOwroKJId+NKSk7T7W3WNcSNnJRcAwFBZr75RM+B1InxfqSLICskg6HQzBM3IaQau49XXpIMfvgNJ7aClCgH2NoHPfYmCfR5PLPNqxgK+e1Kd02WAXMgFSIAbDS/NRp5t7yJXhyKVTRIDI+F9xD73bmTJM0J1nXoZE30qCy/F7HMY4dQkpzHk7JRwv8U5Zye8rvIjTHtyVRFwcN4q0MFypD54vkyDZZfNxZ2ephubU0jcVONU4AJ6sYSOxzsklQmujR7FUDOMN5RwTq9vaz1QmxBaa1cfIVF+c0CSDnLOBgR/urPhGsjt34aIp3/Ugn6me0/nsuqU/qiyxto+NVBo/2biWofN4UzWnm/57y+UfFziAkm/NQRei4IY5n51+pQs/FPVJiYakefeEFow93WFqpn4BvJQws9NB/WTBa6OOXgIShVyVtn9vzp1B2KTXw==
+    duo_radius_secret: AgBb1U9uZmAxp/GRIA/zP6MDQ3nghtQ8C1djd2QyqDcNF+31iqOREPgI9G8SNBpgX+4G2wiftiU5UndQsqbe95m4iNltqDQKKnBWgTl66lnYpCimRYlmtHIEmDWpXKW8n50bpZ8UczjHBUN+qp+g9eQQlZxzoDQy8iK2yCvvI+0D/G7vNajNMkM5AXfoyHaBFezLF2Dz+pcxiVioLP2gEO+aAl2+NT5VC3AzA16M9Ha07S64TzZpXMEAswPww95tK5fGCnKVADt4JzUnSYNIUhQAfnWA+atMqhZ56XOc9YMlns5O2cGbX26DrxS6dGKLy5tWwFoLcKTkRbr6JFGpaOo7jpgVe6WufkU+AiDkhPCF2wnh4w/QF8M5WbhEjq0IV4AGMQF367oGdOZz/yLToSgDvS+OIWcvzK/8ceSELG21aFZ5AkH2ZOY6bLWcJagwiey7j86pZrK5uoLPOSsaBfWqCgMjGLmFdFgOghLG6EiebG9XeeRIlj3NP1vB/8aTXyLOSKMt5mkEsI2n8+lnuUyvYmTWa4jcOqFcl3knbX/dHZWLfnxzv/CNCtT5iDz+7gZ3MwgUhwE95lzEeGmXu3zG2q/ezzGLZBumy0Zt4lh/P80+knOF5N1DwvIn/KGRa0Q13Z8TLB5A6JNQD/ODUhCONvooV6KOxwRMWBRqgdk7GVRzHaW5zQBZWMhSa7+AXce1nA8iL4JNlUzTMpw=
+    duo_secret_key: AgCsAFpo5z7kgjyArRsau6yNJLWhRVCSM3YU+3+Y0xrj791dT1FmOaCcl/KFKAkEwOKBXiWiX/AAbvUR+CbQFkSHdbJaUqV+qTslDOvm97XVYrk8iVOvCWiXZx8VzFJv36hZQODS8ctsioM+o8kl6Au6z/lc0hlXS9BoASBFZpHAzGT5KFtlAEC/GhS2jtaIVohbgLFT+umU/nAaP4euj9ug66u6ryYQrQy98Fjbl2lWhHhm7JYQ0abNEu91px5IJiiRZeoyqc0DyeI0aHdrcbKqia2Y5dz+emhksRE+jSQUMAvg+5827sklsTBXNJopkJVPYpKp2g4MAZ4frmh2OLRtgVuKWxec9vIv+LU/OizsOcfmFclpuMLn0ls8YJUFnmDzlTUojx0P8S2SIYfYLQpNfImIgVaz/Se9GiG+JVxOJ9h3EXCGA8A9efNBpMOFbkqTIkCDiYgectceL8Ro0TAtiHzzofDnRQOxF+NQS058CzvvcZMFGGjGmSfzg2btvo90cAZ4b2/dIw68RYkuDkgGc4tHtmvlCMI+CYMc1aoui6obWiYY+7NUWXd9XzdbiVD+QOojZCOeA2R5WT5Jsko5PHttQJu7p6hneLLUbLZcZzDa/QzW+jUbymFjFDQQqOmUHXQGKuUrW9nDVGUbD81/jV/kSZEdbPnlStyCOfXOSr0+609WEj6R82sJLBCKUou5YXQ79ZRWP9NbNYMQcwBmyJ4tNdeEV9dAiV/Frm8zUyi1UzURZHrH
+  "{{ .Release.Name }}-route53":
+    secret_access_key: AgCt+02YxGd8V1Lcl+Z/TP3aj1QWDiYXk1DfANem85IrHBEcoTq1GvuSL5/oCiK/k/7+gl4Gg6TzY1/vAxjjaEQ0+tVM4cwAik9hm9YQrFjJgDKllmsVqAU3Vlu4DXB+gvgUhbpy94vGfL0I2PfkG5btqqI4Ap26Stlakq+esVmyOufCWMkaqRB//OUV7W4Ezha9vkY40z33PjETBeWLbVWZyOTM7vtosuH5xUUojjZEkLlhigh2mb8aEeBe9/qRvZlYXLTROVpS6qKqxQF2pd+S39eazjfJ8kH4GFiVxBrcoHtdBDLD6r/OjRXt8Ck9Fmb3WXdDqZl/Sc3ZeokzzsrCh++XlG+x12PsV/IHA4zFO3AkkrW6Kdben/iLmlW7oM5u8wEVerae8eI/UqRUejaCCaoqlBKMgp5ZsqpIPFw8aFGTN0oh15OPrXWlOiTmgeuS0QLZSr8Vda4El5XauV5dfu7/bIwW8mpA/2hphe82xTaN+ZFxxSauP1xwOjxiQyb5zR5Pi5ZKDKXm49cUVjiyjKeJOY6oMYHb1J0WDaocagFKIMhr3q2RWAyAZJY2y7suytBi7VYOWgK/fEXuoCM0fAZDfBPiw8gXshYSzVU5EVKL3tBtsnKXSyC/1nS/uh4iKA68+EPdI6ECl6qy/6gkQMz3bWj7AfnZmWS3CjB0+gVZcK0iiCASSLr7JUr957NYrKb3Zl8gDWZ+lp78btCLIfdmpM8V40Ct/nXRajMTKs3tNQ7LTljX
+  "{{ .Release.Name }}-smtp-relay":
+    password: AgCesFHg8SNCG7PQDQoI1Q+rMfkuVDmEbJVO1G/6vPvhLJRpcI5FYSf/+8Ud7SdO8vjqyW3fJhMTyVSregdsoP5HzENXnNucRK2W4awBzXzTMq5k1CGSd4GEAgRFVhHgXh2UkCYRRP+XMG+H4fdxrSacWZzlPBtMaFkgEteYqsBSHsiDHq+9/O4FsxSx3br2WI5Vasqea7ZUJu/Us9pFMuOvJXbEeiZZvRm6yBz4RK/tkxWQIzK6I8BGr3WBN9NqdSQYpZ9PkMNagt8yk1FsgDya+75XegB2ZGLZEx2iUJ4tzWoIY0AzSyc5lVeT+FGAfD6IOgn4k3dzoSWD7MocR5TZamjcUf0+46EL1xO/xkH83C+IhcoJLdTx6t7ptgG5Ue3wgzAffeZMyDAkIFqmCCsRvQIg57SLZari1K8K0B9u6qvDBaXnMgeORtB+a/78rYaNgMFC2m1qtB1mioSJAFQUbIklyI4O+OwgFdFJpNPIYmacQbGv5d+iuPFxMo37nEWmBWQ/GykTfqM/fMCYrpA8HGsPwWoxJ2rKCUxWWo75UIaIbOsqzAiLF0l2CSWz37ANwdOnQU6KO4tweNVtf0TaHDOsJ2AyDn8KRXL/x2NXnbzHBVq2Nj7CodK66uQqkqZd2vKjL72lwBVKHYEC8CVAiZFq63eTBO8S70OHiX6cDPKeOkcWQHzW+T32fE/Ma+osEEYcD3NvpEprUwAUx7nbJKKusQ==
+components:
+  - haproxy
+  - cert_manager
+  - guacamole
+  - guacamole_users
+  - squid
+  - dnsmasq
+  - smtp
+  - duo
+mysql:
+  version: latest
+  mysql_database: guacamole
+  mysql_username: guacamole
+smtp:
+  version: latest
+  type: gmail # smarthost. if gmail, smarthost_* entries are not needed.
+  gmail_user: demonotificationacct@gmail.com
+  # smarthost_address: 1.2.3.4
+  # smarthost_user: user@domain.com
+  # smarthost_port: 587
+  relay_networks: 0.0.0.0/0
+cert_manager:
+  # You must replace this email address with your own.
+  # Let's Encrypt will use this to contact you about expiring
+  # certificates, and issues related to your account.
+  email: demonotificationacct@gmail.com
+  route53_region: us-east-1
+  route53_access_key_id: AKIAXCGVZA7GBFAPD2KE
+  server: https://acme-staging-v02.api.letsencrypt.org/directory
+  dnsNames:
+  - 'demo.example.com'
+  - '*.demo.example.com'
+duo:
+  version: latest
+  duo_ad_host: 'domain.com'
+  duo_ad_user: 'duouser@domain.com'
+  duo_ad_search_dn: 'CN=Users,{{ .Values.global.domain_name }}'
+  duo_failmode: 'secure'
+dnsmasq:
+  version: latest
+  args:
+    - '--server=192.168.1.159'
+    - '--server=/domain.com/192.168.1.159'
+squid:
+  version: latest
+  cfg: |
+    #Set allowed ports
+    acl SSL_ports port 443
+    acl Safe_ports port 80          # http
+    acl Safe_ports port 443         # https
+    acl CONNECT method CONNECT
+
+    # Block anything that is not ports 80/443
+    http_access deny !Safe_ports
+    http_access deny CONNECT !SSL_ports
+
+    #Disable caching
+    cache deny all
+
+    #Support email for failure page.
+    cache_mgr support@domain.local
+
+    #Set source clients
+    acl test_src src all
+
+    #Set port number
+    http_port 3128
+
+    #Allow All
+    http_access allow all
+    http_access allow CONNECT all
+guacamole:
+  debug: false
+  db_volume_size: 2G
+  shared_volume_size: 12G
+  version: latest
+  properties: |
+    enable-environment-properties: true
+    ldap-encryption-method: none
+    ldap-group-base-dn: {{ .Values.global.default_domain_ldap }}
+    ldap-group-name-attribute: cn
+    ldap-hostname: {{ .Values.global.default_domain }}
+    ldap-port: 389
+    ldap-search-bind-dn: CN=guacuser,CN=Users,{{ .Values.global.default_domain_ldap }}
+    #ldap-search-bind-password: # set with env LDAP_SEARCH_BIND_PASSWORD
+    ldap-user-base-dn: CN=Users,{{ .Values.global.default_domain_ldap }}
+    ldap-user-search-filter: (objectCategory=*)
+    ldap-username-attribute: samAccountName
+guacamole_users:
+  version: latest
+  log_locals: 'true'
+  auto_connection_dns: 'false'
+  auto_connection_dns_resolver: '192.168.1.159'
+  guac_admin_groups: 'GuacAdmin'
+  ldap_computer_base_dn: '{{ .Values.global.default_domain_ldap }}'
+  ldap_computer_filter: '(objectCategory=Computer)'
+  ldap_group_name_from_conn_name_regex: '(.*?)\..+'
+  ldap_group_name_mod: '{regex}'
+  refresh_speed: '300'
+  manual_only: 'false'
+  manual_connections: |
+    manual_connections:
+      defaults:
+        connection:
+          protocol: 'rdp'
+        parameters:
+          console-audio: 'true'
+          create-drive-path: 'true'
+          drive-name: 'shared'
+          drive-path: '/shared'
+          enable-drive: 'true'
+          enable-printing: 'true'
+          ignore-cert: 'true'
+          port: '3389'
+          printer-name: 'RemotePrinter'
+          security: 'nla'
+          username: '${GUAC_USERNAME}'
+          password: '${GUAC_PASSWORD}'
+          domain: '{{ .Values.global.default_domain }}'
+      connections:
+       - defaults: true
+         connection:
+           connection_name: 'TEST-CONNECTION.domain.com - 192.168.1.160'
+         parameters:
+           hostname: '192.168.1.160'
+    #parameters section and specific paramters are only required if they are not the defaults.
+    # If manual connections are specified, permissions are required to be set for all manual connections.
+    # List all ldap groups under the connection_name for each manual connection. Any user in the ldap group
+    # will have permission to connect with the specific connection.
+    manual_permissions:
+      "Domain Users":
+        - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+      ThisIsATestGroup:
+        - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+  auto_connections: |
+    connection:
+      protocol: 'rdp'
+    parameters: # Connection parameters are defined here under 'Configuring Connections': https://guacamole.apache.org/doc/gug/configuring-guacamole.html
+      console-audio: 'true'
+      create-drive-path: 'true'
+      drive-name: 'shared'
+      drive-path: '/shared'
+      enable-drive: 'true'
+      enable-printing: 'true'
+      ignore-cert: 'true'
+      port: '3389'
+      printer-name: 'RemotePrinter'
+      security: 'nla'
+      username: '${GUAC_USERNAME}'
+      password: '${GUAC_PASSWORD}'
+      domain: '{{ .Values.global.default_domain }}'
+haproxy:
+  ports:
+    - name: http
+#      protocol: TCP # default is TCP
+      port: 80
+      targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443 # default is TCP
+      targetPort: 8443
+  version: 2.5.1
+  cfg: |
+    global
+      log stdout format raw local0
+      daemon
+      # Default ciphers to use on SSL-enabled listening sockets.
+      # For more information, see ciphers(1SSL).
+      ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+      ssl-load-extra-del-ext
+
+    defaults
+      log     global
+      mode    http
+      option  httplog
+      option  dontlognull
+      timeout connect 10s
+      timeout client 30s
+      timeout server 30s
+
+    frontend http
+        bind *:8080
+        mode http
+        redirect scheme https code 301
+
+    frontend https
+        bind *:8443 ssl crt /usr/local/etc/certs/
+        http-response set-header Strict-Transport-Security "max-age=16000000; includeSubDomains; preload;"
+        option forwardfor
+        acl is_guac hdr(host) -i {{ .Values.global.default_dns }}
+        use_backend guac if is_guac
+
+    backend guac
+        server guac {{ .Release.Name }}-guacamole-service:8080
