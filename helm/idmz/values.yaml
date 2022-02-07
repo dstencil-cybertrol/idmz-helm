@@ -51,6 +51,7 @@ cert_manager:
   email: demonotificationacct@gmail.com
   route53_region: us-east-1
   route53_access_key_id: AKIAXCGVZA7GBFAPD2KE
+  #route53_hosted_zone_id: Z0091177ZFZLS2BDDN6U
   server: https://acme-staging-v02.api.letsencrypt.org/directory
   dnsNames:
   - 'demo.example.com'

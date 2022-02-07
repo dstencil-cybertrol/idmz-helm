@@ -24,6 +24,9 @@ spec:
             secretAccessKeySecretRef:
               name: {{ .Release.Name }}-route53
               key: secret_access_key
+            {{- if hasKey .Values.cert_manager "route53_hosted_zone_id" }}
+            hostedZoneID: {{ .Values.cert_manager.route53_hosted_zone_id }}
+            {{- end }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
