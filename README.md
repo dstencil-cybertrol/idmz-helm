@@ -211,3 +211,10 @@ flux create kustomization idmz --source=idmz-deployment --path="./clusters/produ
 ```bash
 watch flux get all
 ```
+
+Flux seems to fail installing CRDs for cert-manager. If this happens, you can manually install the CRDs.
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.crds.yaml
+```
+

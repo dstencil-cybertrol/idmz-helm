@@ -58,8 +58,8 @@ cert_manager:
   - '*.demo.example.com'
 duo:
   version: latest
-  duo_ad_host: 'domain.com'
-  duo_ad_user: 'duouser@domain.com'
+  duo_ad_host: '{{ .Values.global.default_domain }}'
+  duo_ad_user: 'duouser@{{ .Values.global.default_domain }}'
   duo_ad_search_dn: 'CN=Users,{{ .Values.global.domain_name }}'
   duo_failmode: 'secure'
 dnsmasq:
