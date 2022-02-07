@@ -1,6 +1,6 @@
 apiVersion: v2
 name: idmz
-version: "0.0.1"
+version: "0.0.2"
 description: Helm chart for IDMZs.
 type: application
 keywords:
@@ -22,5 +22,5 @@ sources:
 maintainers: # (optional)
   - name: alphabet5
     url: https://github.com/alphabet5
-appVersion: "0.0.1"
+appVersion: "0.0.2"
 deprecated: false
