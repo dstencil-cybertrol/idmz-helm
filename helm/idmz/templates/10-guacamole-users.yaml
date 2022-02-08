@@ -58,7 +58,7 @@ spec:
             - name: CFG_AUTO_CONNECTION_DNS
               value: {{ .Values.guacamole_users.auto_connection_dns | quote }}
             - name: CFG_AUTO_CONNECTION_DNS_RESOLVER
-              value: {{ .Values.guacamole_users.auto_connection_dns_resolvers | quote }}
+              value: {{ .Values.guacamole_users.auto_connection_dns_resolver | quote }}
             - name: GUAC_ADMIN_GROUPS
               value: {{ .Values.guacamole_users.guac_admin_groups | quote }}
             - name: LDAP_COMPUTER_BASE_DN

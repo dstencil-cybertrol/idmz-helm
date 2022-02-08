@@ -168,6 +168,11 @@ spec:
               value: {{ .Release.Name }}-guac-mysql-service
             - name: GUACAMOLE_HOME
               value: /etc/guacamole
+            - name: LDAP_SEARCH_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-ldap-secret
+                  key: ldap_password
           ports:
             - name: guacamole
               containerPort: 8080

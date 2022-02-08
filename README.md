@@ -11,6 +11,12 @@ sudo systemctl enable iscsid
 microk8s enable openebs
 ```
 
+Note, by default CoreDNS forwards to 8.8.8.8 and 8.8.4.4. This can be configured when enabling CoreDNS with:
+
+```bash
+microk8s enable dns:1.1.1.1
+```
+
 ## Environment Setup
 
 ### Install the dependencies
