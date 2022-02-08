@@ -11,7 +11,7 @@ spec:
   # - ReadWriteOnce (RW from a node)
   # - ReadOnlyMany (R from multi nodes)
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   storageClassName: {{ .Values.kubernetes.storage }}
   resources:
     requests:
