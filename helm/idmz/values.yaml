@@ -99,7 +99,7 @@ guacamole:
   debug: false
   db_volume_size: 2G
   shared_volume_size: 12G
-  version: latest
+  version: 1.4.0
   properties: |
     enable-environment-properties: true
     ldap-encryption-method: none

@@ -8,10 +8,14 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
+  {{- if hasKey .Values.guacamole_users "manual_connections" }}
   manual-connections.yaml: |
 {{ tpl .Values.guacamole_users.manual_connections . | indent 4 }}
+  {{- end }}
+  {{- if hasKey .Values.guacamole_users "auto_connections" }}
   auto-connections.yaml: |
 {{ tpl .Values.guacamole_users.auto_connections . | indent 4 }}
+  {{- end }}
 ---
 # Guacamole users deployment
 apiVersion: apps/v1
@@ -74,12 +78,16 @@ spec:
             - name: MANUAL_ONLY
               value: {{ .Values.guacamole_users.manual_only | quote }}
           volumeMounts:
+          {{- if hasKey .Values.guacamole_users "manual_connections" }}
             - name: {{ .Release.Name }}-guacamole-users-volume
               mountPath: "/configs/manual-connections.yaml"
               subPath: "manual-connections.yaml"
+          {{- end }}
+          {{- if hasKey .Values.guacamole_users "auto_connections" }}
             - name: {{ .Release.Name }}-guacamole-users-volume
               mountPath: "/configs/auto-connections.yaml"
               subPath: "auto-connections.yaml"
+          {{- end }}
             - name: {{ .Release.Name }}-guacamole-properties-volume
               mountPath: "/configs/guacamole.properties"
               subPath: "guacamole.properties"

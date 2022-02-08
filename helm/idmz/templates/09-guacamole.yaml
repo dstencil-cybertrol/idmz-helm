@@ -143,6 +143,16 @@ spec:
         app: {{ .Release.Name }}-guacamole
     spec:
       restartPolicy: Always
+      initContainers:
+        - name: {{ .Release.Name }}-guacamole-init-container
+          image: alphabet5/guacamole
+          command:
+            - '/bin/bash'
+            - '-c'
+            - 'cp /extensions/guacamole-auth-ldap*.jar /emptydir/'
+          volumeMounts:
+            - name: {{ .Release.Name }}-guac-extensions-volume
+              mountPath: "/emptydir/"
       containers:
         - name: {{ .Release.Name }}-guacamole-container
           image: guacamole/guacamole:{{ .Values.guacamole.version }}
@@ -187,6 +197,8 @@ spec:
             {{- end }}
             - name: {{ .Release.Name }}-guac-shared-persistent-storage-volume
               mountPath: "/shared/"
+            - name: {{ .Release.Name }}-guac-extensions-volume
+              mountPath: "/etc/guacamole/extensions/"
           startupProbe:
             tcpSocket:
               port: 8080
@@ -214,4 +226,6 @@ spec:
         - name: {{ .Release.Name }}-guac-shared-persistent-storage-volume
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-guac-shared-persistent-storage
+        - name: {{ .Release.Name }}-guac-extensions-volume
+          emptyDir: {}
 {{ end }}

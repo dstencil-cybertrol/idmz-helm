@@ -47,9 +47,9 @@ spec:
           imagePullPolicy: Always
           env:
             - name: DUO_AD_HOST
-              value: {{ .Values.duo.duo_ad_host }}
+              value: {{ tpl .Values.duo.duo_ad_host . }}
             - name: DUO_AD_USER
-              value: {{ .Values.duo.duo_ad_user }}
+              value: {{ tpl .Values.duo.duo_ad_user . }}
             - name: DUO_AD_PASSWORD
               valueFrom:
                 secretKeyRef:
