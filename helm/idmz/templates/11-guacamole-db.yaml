@@ -1,22 +1,4 @@
 {{ if has "guacamole" .Values.components }}
-# MySQL PVC
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ .Release.Name }}-guac-mysql-persistent-storage
-  namespace: {{ .Release.Namespace }}
-spec:
-  # access mode:
-  # - ReadWriteMany (RW from multi nodes)
-  # - ReadWriteOnce (RW from a node)
-  # - ReadOnlyMany (R from multi nodes)
-  accessModes:
-    - ReadWriteMany
-  storageClassName: {{ .Values.kubernetes.storage }}
-  resources:
-    requests:
-      storage: {{ .Values.guacamole.db_volume_size }}
----
 # MySQL ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -120,6 +102,8 @@ spec:
             - name: {{ .Release.Name }}-mysql-init-script-volume
               mountPath: "/docker-entrypoint-initdb.d/initdb.sh"
               subPath: "initdb.sh"
+            - name: {{ .Release.Name }}-guac-mysql-volume
+              mountPath: "/var/lib/mysql/"
           startupProbe:
             exec:
               command:
@@ -160,7 +144,6 @@ spec:
             name: {{ .Release.Name }}-mysql-init-script-configmap
         - name: {{ .Release.Name }}-mysql-init-sql-script-volume
           emptyDir: {}
-        - name: {{ .Release.Name }}-guac-mysql-persistent-storage-volume
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-guac-mysql-persistent-storage
+        - name: {{ .Release.Name }}-guac-mysql-volume
+          emptyDir: {}
 {{ end }}

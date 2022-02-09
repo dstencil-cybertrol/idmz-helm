@@ -1,22 +1,4 @@
 {{ if has "guacamole" .Values.components }}
-# Shared Folder PVC
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ .Release.Name }}-guac-shared-persistent-storage
-  namespace: {{ .Release.Namespace }}
-spec:
-  # access mode:
-  # - ReadWriteMany (RW from multi nodes)
-  # - ReadWriteOnce (RW from a node)
-  # - ReadOnlyMany (R from multi nodes)
-  accessModes:
-    - ReadWriteMany
-  storageClassName: {{ .Values.kubernetes.storage }}
-  resources:
-    requests:
-      storage: {{ .Values.guacamole.shared_volume_size }}
----
 # Guacd service
 apiVersion: v1
 kind: Service
@@ -195,7 +177,7 @@ spec:
               mountPath: "/etc/guacamole/logback.xml"
               subPath: "logback.xml"
             {{- end }}
-            - name: {{ .Release.Name }}-guac-shared-persistent-storage-volume
+            - name: {{ .Release.Name }}-guac-shared-volume
               mountPath: "/shared/"
             - name: {{ .Release.Name }}-guac-extensions-volume
               mountPath: "/etc/guacamole/extensions/"
@@ -223,9 +205,8 @@ spec:
           configMap:
             name: {{ .Release.Name }}-guacamole-logback-configmap
         {{- end }}
-        - name: {{ .Release.Name }}-guac-shared-persistent-storage-volume
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-guac-shared-persistent-storage
+        - name: {{ .Release.Name }}-guac-shared-volume
+          emptyDir: {}
         - name: {{ .Release.Name }}-guac-extensions-volume
           emptyDir: {}
 {{ end }}

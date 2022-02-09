@@ -17,6 +17,18 @@ Note, by default CoreDNS forwards to 8.8.8.8 and 8.8.4.4. This can be configured
 microk8s enable dns:1.1.1.1
 ```
 
+For ReadWriteMany pvc, NFS is needed.
+
+```bash
+sudo apt-get install nfs-common -y
+helm repo uninstall -n openebs openebs #uninstalls the helm chart that gets installed with the command microk8s enable openebs
+helm repo add openebs https://openebs.github.io/charts
+helm upgrade openebs openebs/openebs \
+  --namespace openebs \
+  --set nfs-provisioner.enabled=true \
+  --reuse-values
+```
+
 ## Environment Setup
 
 ### Install the dependencies
