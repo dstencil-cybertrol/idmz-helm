@@ -35,6 +35,19 @@ data:
   squid.conf: |
 {{ tpl .Values.squid.cfg . | indent 4 }}
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: squid-whitelists-configmap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+{{- range $filename, $contents := $.Values.squid.whitelists }}
+  {{ $filename }}: |
+{{ $contents | indent 4 }}
+{{- end }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -63,6 +76,8 @@ spec:
             - name: squid-conf-volume
               mountPath: "/etc/squid/squid.conf"
               subPath: "squid.conf"
+            - name: squid-whitelists-volume
+              mountPath: "/whitelists/"
           startupProbe:
             tcpSocket:
               port: 3128
@@ -82,4 +97,8 @@ spec:
         - name: squid-conf-volume
           configMap:
             name: squid-conf-configmap
+        - name: squid-whitelists-volume
+          configMap:
+            name: squid-whitelists-configmap
+
 {{ end }}

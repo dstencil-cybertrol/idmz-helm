@@ -69,6 +69,41 @@ dnsmasq:
     - '--server=/domain.com/192.168.1.159'
 squid:
   version: latest
+  whitelists:
+    rockwell.txt: |
+      .rockwellautomation.custhelp.com
+      .rockwellautomation.com
+    semantic.txt: |
+      liveupdate.symantec.com
+      liveupdate.symantecliveupdate.com
+      ent-shasta.rrs.symantec.com
+      tses.broadcom.com
+      telemetry.broadcom.com
+      ent-shasta-mr-clean.symantec.com
+      central.ss.crsi.symantec.com
+      central.nrsi.symantec.com
+      central.avsi.symantec.com
+      central.b6.crsi.symantec.com
+      central.crsi.symantec.com
+      stnd-avpg.crsi.symantec.com
+      avs-avpg.crsi.symantec.com
+      stnd-ipsg.crsi.symantec.com
+      bash-avpg.crsi.symantec.com
+      sp.cwfservice.net
+      tus1gwynwapex01.symantec.com
+      faults.qalabs.symantec.com
+      faults.symantec.com
+      linux-repo.us.securitycloud.symantec.com
+    windows_updates.txt: |
+      asdf.windowsupdate.microsoft.com
+      .update.microsoft.com
+      .windowsupdate.com
+      .download.windowsupdate.com
+      download.microsoft.com
+      wustat.windows.com
+      ntservicepack.microsoft.com
+      go.microsoft.com
+      dl.delivery.mp.microsoft.com
   cfg: |
     #Set allowed ports
     acl SSL_ports port 443
