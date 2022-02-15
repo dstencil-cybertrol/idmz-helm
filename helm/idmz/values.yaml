@@ -104,6 +104,7 @@ guacamole:
     enable-environment-properties: true
     ldap-encryption-method: none
     ldap-group-base-dn: {{ .Values.global.default_domain_ldap }}
+    ldap-group-search-filter: (objectCategory=group)
     ldap-group-name-attribute: cn
     ldap-hostname: {{ .Values.global.default_domain }}
     ldap-port: 389

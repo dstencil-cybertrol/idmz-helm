@@ -11,7 +11,7 @@ spec:
       port: 4822
       targetPort: 4822
   selector:
-    app: guacd
+    app: {{ .Release.Name }}-guacd
 ---
 # Guacd deployment
 apiVersion: apps/v1

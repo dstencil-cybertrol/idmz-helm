@@ -91,6 +91,13 @@ spec:
             - name: {{ .Release.Name }}-guacamole-properties-volume
               mountPath: "/configs/guacamole.properties"
               subPath: "guacamole.properties"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
       volumes:
         - name: {{ .Release.Name }}-guacamole-users-volume
           configMap:
