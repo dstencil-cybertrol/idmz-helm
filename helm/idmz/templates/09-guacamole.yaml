@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-guacd-service
+  name: guacd-service
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -11,27 +11,27 @@ spec:
       port: 4822
       targetPort: 4822
   selector:
-    app: {{ .Release.Name }}-guacd
+    app: guacd
 ---
 # Guacd deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name}}-guacd-deployment
+  name: guacd-deployment
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-guacd
+      app: guacd
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-guacd
+        app: guacd
     spec:
       restartPolicy: Always
       containers:
-        - name: {{ .Release.Name }}-guacd-container
+        - name: guacd-container
           image: guacamole/guacd
           imagePullPolicy: Always
           ports:
@@ -56,7 +56,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-guacamole-properties-configmap
+  name: guacamole-properties-configmap
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/match: "true"
@@ -69,7 +69,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-guacamole-logback-configmap
+  name: guacamole-logback-configmap
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/match: "true"
@@ -96,7 +96,7 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-guacamole-service
+  name: guacamole-service
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -104,13 +104,13 @@ spec:
       port: 8080
       targetPort: 8080
   selector:
-    app: {{ .Release.Name }}-guacamole
+    app: guacamole
 ---
 # Guacamole deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-guacamole-deployment
+  name: guacamole-deployment
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/search: "true"
@@ -118,25 +118,25 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-guacamole
+      app: guacamole
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-guacamole
+        app: guacamole
     spec:
       restartPolicy: Always
       initContainers:
-        - name: {{ .Release.Name }}-guacamole-init-container
+        - name: guacamole-init-container
           image: alphabet5/guacamole
           command:
             - '/bin/bash'
             - '-c'
             - 'cp /extensions/guacamole-auth-ldap*.jar /emptydir/'
           volumeMounts:
-            - name: {{ .Release.Name }}-guac-extensions-volume
+            - name: guac-extensions-volume
               mountPath: "/emptydir/"
       containers:
-        - name: {{ .Release.Name }}-guacamole-container
+        - name: guacamole-container
           image: guacamole/guacamole:{{ .Values.guacamole.version }}
           imagePullPolicy: Always
           command:
@@ -150,36 +150,36 @@ spec:
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql-secret
+                  name: mysql-secret
                   key: mysql_password
             - name: MYSQL_DATABASE
               value: {{ .Values.mysql.mysql_database }}
             - name: GUACD_HOSTNAME
-              value: {{ .Release.Name }}-guacd-service
+              value: guacd-service
             - name: MYSQL_HOSTNAME
-              value: {{ .Release.Name }}-guac-mysql-service
+              value: guac-mysql-service
             - name: GUACAMOLE_HOME
               value: /etc/guacamole
             - name: LDAP_SEARCH_BIND_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-ldap-secret
+                  name: ldap-secret
                   key: ldap_password
           ports:
             - name: guacamole
               containerPort: 8080
           volumeMounts:
-            - name: {{ .Release.Name }}-guacamole-properties-volume
+            - name: guacamole-properties-volume
               mountPath: "/etc/guacamole/guacamole.properties"
               subPath: "guacamole.properties"
             {{- if .Values.guacamole.debug }}
-            - name: {{ .Release.Name }}-guacamole-logback-volume
+            - name: guacamole-logback-volume
               mountPath: "/etc/guacamole/logback.xml"
               subPath: "logback.xml"
             {{- end }}
-            - name: {{ .Release.Name }}-guac-shared-volume
+            - name: guac-shared-volume
               mountPath: "/shared/"
-            - name: {{ .Release.Name }}-guac-extensions-volume
+            - name: guac-extensions-volume
               mountPath: "/etc/guacamole/extensions/"
           startupProbe:
             tcpSocket:
@@ -197,16 +197,16 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 1
       volumes:
-        - name: {{ .Release.Name }}-guacamole-properties-volume
+        - name: guacamole-properties-volume
           configMap:
-            name: {{ .Release.Name }}-guacamole-properties-configmap
+            name: guacamole-properties-configmap
         {{- if .Values.guacamole.debug }}
-        - name: {{ .Release.Name }}-guacamole-logback-volume
+        - name: guacamole-logback-volume
           configMap:
-            name: {{ .Release.Name }}-guacamole-logback-configmap
+            name: guacamole-logback-configmap
         {{- end }}
-        - name: {{ .Release.Name }}-guac-shared-volume
+        - name: guac-shared-volume
           emptyDir: {}
-        - name: {{ .Release.Name }}-guac-extensions-volume
+        - name: guac-extensions-volume
           emptyDir: {}
 {{ end }}

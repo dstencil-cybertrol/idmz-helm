@@ -7,21 +7,21 @@ global:
   default_domain_ldap: 'DC=domain,DC=com'
   default_dns: 'guac.demo.example.com'
 secrets:
-  "{{ .Release.Name }}-mysql-secret":
+  "mysql-secret":
     mysql_password: change_me
     mysql_root_password: change_me
     guacadmin_password: change_me
-  "{{ .Release.Name }}-ldap-secret":
+  "ldap-secret":
     ldap_password: change_me
-  "{{ .Release.Name }}-duo-secret":
+  "duo-secret":
     duo_ad_password: change_me
     duo_api_hostname: change_me
     duo_integration_key: change_me
     duo_radius_secret: change_me
     duo_secret_key: change_me
-  "{{ .Release.Name }}-route53":
+  "route53":
     secret_access_key: change_me
-  "{{ .Release.Name }}-smtp-relay":
+  "smtp-relay":
     password: change_me
 components:
   - haproxy
@@ -218,4 +218,4 @@ haproxy:
         use_backend guac if is_guac
 
     backend guac
-        server guac {{ .Release.Name }}-guacamole-service:8080
+        server guac guacamole-service:8080

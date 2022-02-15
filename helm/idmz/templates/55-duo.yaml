@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-duo-auth-proxy-service
+  name: duo-auth-proxy-service
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
@@ -22,12 +22,12 @@ spec:
       port: 1812
       targetPort: 1812
   selector:
-    app: {{ .Release.Name }}-duo-auth-proxy
+    app: duo-auth-proxy
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-duo-auth-proxy-deployment
+  name: duo-auth-proxy-deployment
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/search: "true"
@@ -35,14 +35,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-duo-auth-proxy
+      app: duo-auth-proxy
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-duo-auth-proxy
+        app: duo-auth-proxy
     spec:
       containers:
-        - name: {{ .Release.Name }}-duo-auth-proxy-container
+        - name: duo-auth-proxy-container
           image: alphabet5/duoauthproxy:{{ .Values.duo.version }}
           imagePullPolicy: Always
           env:
@@ -53,29 +53,29 @@ spec:
             - name: DUO_AD_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-duo-secret
+                  name: duo-secret
                   key: duo_ad_password
             - name: DUO_AD_SEARCH_DN
               value: {{ tpl .Values.duo.duo_ad_search_dn . }}
             - name: DUO_INTEGRATION_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-duo-secret
+                  name: duo-secret
                   key: duo_integration_key
             - name: DUO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-duo-secret
+                  name: duo-secret
                   key: duo_secret_key
             - name: DUO_API_HOSTNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-duo-secret
+                  name: duo-secret
                   key: duo_api_hostname
             - name: DUO_RADIUS_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-duo-secret
+                  name: duo-secret
                   key: duo_radius_secret
             - name: DUO_FAILMODE
               value: {{ .Values.duo.duo_failmode }}

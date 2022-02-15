@@ -2,7 +2,7 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: {{ .Release.Name }}-letsencrypt
+  name: letsencrypt
   namespace: {{ .Release.Namespace }}
 spec:
   acme:
@@ -13,7 +13,7 @@ spec:
     server: {{ .Values.cert_manager.server }}
     privateKeySecretRef:
       # Secret resource that will be used to store the account's private key.
-      name: {{ .Release.Name }}-letsencrypt-private-key
+      name: letsencrypt-private-key
     # Add a single challenge solver, HTTP01 using nginx
     solvers:
       - selector: {}
@@ -22,7 +22,7 @@ spec:
             region: {{ .Values.cert_manager.route53_region }}
             accessKeyID: {{ .Values.cert_manager.route53_access_key_id }}
             secretAccessKeySecretRef:
-              name: {{ .Release.Name }}-route53
+              name: route53
               key: secret_access_key
             {{- if hasKey .Values.cert_manager "route53_hosted_zone_id" }}
             hostedZoneID: {{ .Values.cert_manager.route53_hosted_zone_id }}
@@ -31,15 +31,15 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ .Release.Name }}-cert-renewal
+  name: cert-renewal
   namespace: {{ .Release.Namespace }}
 spec:
-  secretName: {{ .Release.Name }}-haproxy-app-tls
+  secretName: haproxy-app-tls
   secretTemplate:
     annotations:
       reloader.stakater.com/match: "true"
   issuerRef:
-    name: {{ .Release.Name }}-letsencrypt
+    name: letsencrypt
   dnsNames: 
     {{- range .Values.cert_manager.dnsNames }}
     - {{ . | quote }}

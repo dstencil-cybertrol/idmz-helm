@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-squid-service
+  name: squid-service
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
@@ -22,12 +22,12 @@ spec:
       port: 3128
       targetPort: 3128
   selector:
-    app: {{ .Release.Name }}-squid
+    app: squid
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-squid-conf-configmap
+  name: squid-conf-configmap
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/match: "true"
@@ -38,7 +38,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-squid-deployment
+  name: squid-deployment
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/search: "true"
@@ -46,21 +46,21 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-squid
+      app: squid
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-squid
+        app: squid
     spec:
       containers:
-        - name: {{ .Release.Name }}-squid-container
+        - name: squid-container
           image: alphabet5/squid:{{ .Values.squid.version }}
           imagePullPolicy: Always
           ports:
             - containerPort: 3128
               protocol: TCP
           volumeMounts:
-            - name: {{ .Release.Name }}-squid-conf-volume
+            - name: squid-conf-volume
               mountPath: "/etc/squid/squid.conf"
               subPath: "squid.conf"
           startupProbe:
@@ -79,7 +79,7 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 1
       volumes:
-        - name: {{ .Release.Name }}-squid-conf-volume
+        - name: squid-conf-volume
           configMap:
-            name: {{ .Release.Name }}-squid-conf-configmap
+            name: squid-conf-configmap
 {{ end }}

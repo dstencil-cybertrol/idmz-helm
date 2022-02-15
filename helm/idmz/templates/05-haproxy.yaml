@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-haproxy-service
+  name: haproxy-service
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
@@ -24,12 +24,12 @@ spec:
       targetPort: {{.targetPort }}
     {{- end }}
   selector:
-    app: {{ .Release.Name }}-haproxy
+    app: haproxy
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-haproxy-configmap
+  name: haproxy-configmap
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/match: "true"
@@ -40,7 +40,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-haproxy-deployment
+  name: haproxy-deployment
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/search: "true"
@@ -48,14 +48,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-haproxy
+      app: haproxy
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-haproxy
+        app: haproxy
     spec:
       containers:
-        - name: {{ .Release.Name }}-haproxy-container
+        - name: haproxy-container
           image: haproxy:{{ .Values.haproxy.version }}
           imagePullPolicy: Always
           ports:
@@ -63,10 +63,10 @@ spec:
             - containerPort: {{ .targetPort }}
             {{- end }}
           volumeMounts:
-            - name: {{ .Release.Name }}-haproxy-volume
+            - name: haproxy-volume
               mountPath: "/usr/local/etc/haproxy/haproxy.cfg"
               subPath: "haproxy.cfg"
-            - name: {{ .Release.Name }}-haproxy-certs-volume
+            - name: haproxy-certs-volume
               mountPath: "/usr/local/etc/certs/"
           startupProbe:
             tcpSocket:
@@ -84,10 +84,10 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 1
       volumes:
-        - name: {{ .Release.Name }}-haproxy-volume
+        - name: haproxy-volume
           configMap:
-            name: {{ .Release.Name }}-haproxy-configmap
-        - name: {{ .Release.Name }}-haproxy-certs-volume
+            name: haproxy-configmap
+        - name: haproxy-certs-volume
           secret:
-            secretName: {{ .Release.Name }}-haproxy-app-tls
+            secretName: haproxy-app-tls
 {{ end }}

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-dnsmasq-service-tcp
+  name: dnsmasq-service-tcp
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
@@ -22,12 +22,12 @@ spec:
       port: 53
       targetPort: 53
   selector:
-    app: {{ .Release.Name }}-dnsmasq
+    app: dnsmasq
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-dnsmasq-service-udp
+  name: dnsmasq-service-udp
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
@@ -47,25 +47,25 @@ spec:
       port: 53
       targetPort: 53
   selector:
-    app: {{ .Release.Name }}-dnsmasq
+    app: dnsmasq
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-dnsmasq-deployment
+  name: dnsmasq-deployment
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-dnsmasq
+      app: dnsmasq
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-dnsmasq
+        app: dnsmasq
     spec:
       containers:
-        - name: {{ .Release.Name }}-dnsmasq-container
+        - name: dnsmasq-container
           image: alphabet5/dnsmasq:{{ .Values.dnsmasq.version }}
           imagePullPolicy: Always
           args:

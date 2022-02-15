@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-mysql-init-script-configmap
+  name: mysql-init-script-configmap
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/match: "true"
@@ -30,7 +30,7 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-guac-mysql-service
+  name: guac-mysql-service
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -44,7 +44,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-mysql-deployment
+  name: mysql-deployment
   namespace: {{ .Release.Namespace }}
   annotations:
     reloader.stakater.com/search: "true"
@@ -60,14 +60,14 @@ spec:
     spec:
       restartPolicy: Always
       initContainers:
-        - name: {{ .Release.Name }}-mysql-init-container
+        - name: mysql-init-container
           image: guacamole/guacamole:{{ .Values.guacamole.version }}
           command:
             - '/bin/bash'
             - '-c'
             - '/opt/guacamole/bin/initdb.sh --mysql > /mysqlinit/initdb.sql'
           volumeMounts:
-            - name: {{ .Release.Name }}-mysql-init-sql-script-volume
+            - name: mysql-init-sql-script-volume
               mountPath: "/mysqlinit/"
       containers:
         - name: mysql-container-name
@@ -79,30 +79,30 @@ spec:
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql-secret
+                  name: mysql-secret
                   key: mysql_password
             - name: MYSQL_DATABASE
               value: {{ .Values.mysql.mysql_database }}
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql-secret
+                  name: mysql-secret
                   key: mysql_root_password
             - name: GUACADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql-secret
+                  name: mysql-secret
                   key: guacadmin_password
           ports:
             - name: mysql
               containerPort: 3306
           volumeMounts:
-            - name: {{ .Release.Name }}-mysql-init-sql-script-volume
+            - name: mysql-init-sql-script-volume
               mountPath: "/mysqlinit/"
-            - name: {{ .Release.Name }}-mysql-init-script-volume
+            - name: mysql-init-script-volume
               mountPath: "/docker-entrypoint-initdb.d/initdb.sh"
               subPath: "initdb.sh"
-            - name: {{ .Release.Name }}-guac-mysql-volume
+            - name: guac-mysql-volume
               mountPath: "/var/lib/mysql/"
           startupProbe:
             exec:
@@ -139,11 +139,11 @@ spec:
               memory: "128Mi"
               cpu: "500m"
       volumes:
-        - name: {{ .Release.Name }}-mysql-init-script-volume
+        - name: mysql-init-script-volume
           configMap:
-            name: {{ .Release.Name }}-mysql-init-script-configmap
-        - name: {{ .Release.Name }}-mysql-init-sql-script-volume
+            name: mysql-init-script-configmap
+        - name: mysql-init-sql-script-volume
           emptyDir: {}
-        - name: {{ .Release.Name }}-guac-mysql-volume
+        - name: guac-mysql-volume
           emptyDir: {}
 {{ end }}
