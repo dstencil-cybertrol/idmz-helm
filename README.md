@@ -16,6 +16,7 @@ microk8s enable metallb
 microk8s enable dns
 sudo systemctl enable iscsid
 microk8s enable openebs
+microk8s enable metrics-server
 ```
 
 Note, by default CoreDNS forwards to 8.8.8.8 and 8.8.4.4. This can be configured when enabling CoreDNS with:
@@ -297,4 +298,22 @@ spec:
       version: '=0.0.8'
   values:
     ## Your unique values.yaml for the idmz helm chart go here ##
+```
+
+
+## Resource Utilization
+
+```
+kubectl top pod -n idmz
+NAME                                                    CPU(cores)   MEMORY(bytes)
+idmz-idmz-dnsmasq-deployment-5fd7fc455c-t6jtw           1m           1Mi
+idmz-idmz-dnsmasq-deployment-5fd7fc455c-t9zg4           1m           1Mi
+idmz-idmz-duo-auth-proxy-deployment-64bdbf74d5-f8zkq    0m           56Mi
+idmz-idmz-guacamole-deployment-6f6956f8f7-bqtmb         2m           235Mi
+idmz-idmz-guacamole-users-deployment-56858d4457-j6zbx   0m           48Mi
+idmz-idmz-guacd-deployment-5b4c948cb4-44jr7             1m           39Mi
+idmz-idmz-haproxy-deployment-545b88796b-lb7pn           1m           21Mi
+idmz-idmz-mysql-deployment-646d486744-kpzxv             25m          102Mi
+idmz-idmz-smtp-relay-deployment-587f846775-sr2cp        4m           12Mi
+idmz-idmz-squid-deployment-654887f668-5wl4b             1m           19Mi
 ```

@@ -60,7 +60,7 @@ duo:
   version: latest
   duo_ad_host: '{{ .Values.global.default_domain }}'
   duo_ad_user: 'duouser@{{ .Values.global.default_domain }}'
-  duo_ad_search_dn: 'CN=Users,{{ .Values.global.domain_name }}'
+  duo_ad_search_dn: 'CN=Users,{{ .Values.global.default_domain_ldap }}'
   duo_failmode: 'secure'
 dnsmasq:
   version: latest
