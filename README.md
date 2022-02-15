@@ -104,13 +104,13 @@ ssh-genkey
 Add the source repo.
 
 ```bash
-flux create source git yoursourcename --url=ssh://git@github.com/org/CO.Cust.LOC.IDMZ.git --branch=main --private-key-file=./ssh.key.name
+flux create source git co-cust-loc-idmz --url=ssh://git@github.com/org/CO.Cust.LOC.IDMZ.git --branch=main --private-key-file=./ssh.key.name
 ```
 
 Create the kustomization.
 
 ```bash
-flux create kustomization idmz --source=idmz-deployment --path="./clusters/production" --prune=true --interval=1m
+flux create kustomization idmz --source=co-cust-loc-idmz --path="./clusters/production" --prune=true --interval=1m
 ```
 
 - Monitor the progress
