@@ -35,6 +35,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   secretName: {{ .Release.Name }}-haproxy-app-tls
+  secretTemplate:
+    annotations:
+      reloader.stakater.com/match: "true"
   issuerRef:
     name: {{ .Release.Name }}-letsencrypt
   dnsNames: 
