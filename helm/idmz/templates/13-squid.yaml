@@ -7,7 +7,6 @@ metadata:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
     metallb.universe.tf/allow-shared-ip: global
-  externalTrafficPolicy: Local
   {{- end }}
 spec:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
