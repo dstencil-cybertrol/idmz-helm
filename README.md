@@ -4,6 +4,13 @@
 This documentation has been tested with microk8s. MetalLB is used as the load balancer.
 
 ```bash
+sudo snap install microk8s --classic
+sudo usermod -a -G microk8s user
+sudo chown -f -R user ~/.kube
+newgrp microk8s
+```
+
+```bash
 microk8s enable storage
 microk8s enable metallb
 microk8s enable dns
@@ -14,19 +21,13 @@ microk8s enable openebs
 Note, by default CoreDNS forwards to 8.8.8.8 and 8.8.4.4. This can be configured when enabling CoreDNS with:
 
 ```bash
-microk8s enable dns:1.1.1.1
+microk8s enable dns:1.1.1.1,9.9.9.9
 ```
 
-For ReadWriteMany pvc, NFS is needed.
+To view the kbuectl config on (one of) the node(s).
 
 ```bash
-sudo apt-get install nfs-common -y
-helm repo uninstall -n openebs openebs #uninstalls the helm chart that gets installed with the command microk8s enable openebs
-helm repo add openebs https://openebs.github.io/charts
-helm upgrade openebs openebs/openebs \
-  --namespace openebs \
-  --set nfs-provisioner.enabled=true \
-  --reuse-values
+microk8s kubectl config view --raw
 ```
 
 ## Environment Setup
@@ -93,10 +94,65 @@ Alternatively, you can create a deployment key and add the repository that way.
 
 https://fluxcd.io/docs/cmd/flux_create_source_git/
 
+Generate your ssh key.
+
+```bash
+ssh-genkey
+```
+
+Add the source repo.
+
+```bash
+flux create source git yoursourcename --url=ssh://git@github.com/org/CO.Cust.LOC.IDMZ.git --branch=main --private-key-file=./ssh.key.name
+```
+
+Create the kustomization.
+
+```bash
+flux create kustomization idmz --source=idmz-deployment --path="./clusters/production" --prune=true --interval=1m
+```
+
+- Monitor the progress
+
+```bash
+watch flux get all
+```
+
+Flux seems to fail installing CRDs for cert-manager. If this happens, you can manually install the CRDs.
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.crds.yaml
+```
+
+
 
 Along with the flux manifests (`flux install --export`) here is an example:
 
 ```yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: idmz
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reloader
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sealed-secrets
+
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
@@ -121,7 +177,7 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
-  name: sealed-secrets
+  name: cert-manager
   namespace: flux-system
 spec:
   interval: 1h0m0s
@@ -142,13 +198,17 @@ spec:
         name: sealed-secrets
       version: '>=2.1.2'
   install:
-    crds: Create
+    crds: CreateReplace
+    remediation:
+      retries: 3
   interval: 1h0m0s
   releaseName: sealed-secrets
   targetNamespace: sealed-secrets
   upgrade:
     crds: CreateReplace
-
+    remediation:
+      retries: 3
+      remediateLastFailure: true
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -163,12 +223,17 @@ spec:
         kind: HelmRepository
         name: stakater
   install:
-    crds: Create
+    crds: CreateReplace
+    remediation:
+      retries: 3
   interval: 1h0m0s
-  releaseName: sealed-secrets-controller
+  releaseName: reloader
   targetNamespace: reloader
   upgrade:
     crds: CreateReplace
+    remediation:
+      retries: 3
+      remediateLastFailure: true
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
@@ -179,17 +244,22 @@ metadata:
 spec:
   chart:
     spec:
-      chart: sealed-secrets
+      chart: cert-manager
       sourceRef:
         kind: HelmRepository
-        name: sealed-secrets
+        name: cert-manager
       version: '>=1.7.0'
   install:
-    crds: Create
+    crds: CreateReplace
+    remediation:
+      retries: 3
   interval: 1h0m0s
-  targetNamespace: sealed-secrets
+  targetNamespace: cert-manager
   upgrade:
     crds: CreateReplace
+    remediation:
+      retries: 3
+      remediateLastFailure: true
 
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
@@ -200,39 +270,31 @@ metadata:
 spec:
   interval: 1m0s
   url: https://alphabet5.github.io/idmz-helm
+
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: idmz
-  namespace: idmz
+  namespace: flux-system
 spec:
   interval: 1m0s
+  timeout: 5m
+  targetNamespace: idmz
+  upgrade:
+    remediation: 
+      retries: 3
+      remediateLastFailure: true
+  install:
+    remediation:
+      retries: 3
   chart:
     spec:
       chart: idmz
       sourceRef:
         kind: HelmRepository
         name: alphabet5-idmz
+      version: '=0.0.8'
   values:
     ## Your unique values.yaml for the idmz helm chart go here ##
 ```
-
-### Add the Kustomization 
-
-```bash
-flux create kustomization idmz --source=idmz-deployment --path="./clusters/production" --prune=true --interval=1m
-```
-
-- Monitor the progress
-
-```bash
-watch flux get all
-```
-
-Flux seems to fail installing CRDs for cert-manager. If this happens, you can manually install the CRDs.
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.crds.yaml
-```
-

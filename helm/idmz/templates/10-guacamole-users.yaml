@@ -41,8 +41,8 @@ spec:
           image: alphabet5/guacamole-users:{{ .Values.guacamole_users.version }}
           imagePullPolicy: Always
           env:
-            - name: LOGGING_LOCALS
-              value: {{ .Values.guacamole_users.log_locals | quote }}
+            - name: DEBUG
+              value: {{ .Values.guacamole_users.debug | quote }}
             - name: MYSQL_USER
               value: {{ .Values.mysql.mysql_username | quote }}
             - name: MYSQL_PASSWORD
@@ -65,8 +65,8 @@ spec:
               value: {{ .Values.guacamole_users.auto_connection_dns_resolver | quote }}
             - name: GUAC_ADMIN_GROUPS
               value: {{ .Values.guacamole_users.guac_admin_groups | quote }}
-            - name: LDAP_COMPUTER_BASE_DN
-              value: {{ tpl .Values.guacamole_users.ldap_computer_base_dn . | quote }}
+            - name: LDAP_BASE_DN
+              value: {{ tpl .Values.guacamole_users.ldap_base_dn . | quote }}
             - name: LDAP_COMPUTER_FILTER
               value: {{ .Values.guacamole_users.ldap_computer_filter | quote }}
             - name: LDAP_GROUP_NAME_FROM_CONN_NAME_REGEX
