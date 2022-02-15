@@ -21,6 +21,9 @@ spec:
       protocol: TCP
       port: 3128
       targetPort: 3128
+      {{- if eq .Values.kubernetes.networking "NodePort" }}
+      nodePort: 3128
+      {{- end }}
   selector:
     app: squid
 ---

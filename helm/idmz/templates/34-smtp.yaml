@@ -21,6 +21,9 @@ spec:
       protocol: TCP
       port: 25
       targetPort: 25
+      {{- if eq .Values.kubernetes.networking "NodePort" }}
+      nodePort: 25
+      {{- end }}
   selector:
     app: smtp-relay
 ---

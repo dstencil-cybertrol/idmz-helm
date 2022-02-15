@@ -22,6 +22,9 @@ spec:
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{.targetPort }}
+      {{- if eq .Values.kubernetes.networking "NodePort" }}
+      nodePort: {{ .port }}
+      {{- end }}
     {{- end }}
   selector:
     app: haproxy

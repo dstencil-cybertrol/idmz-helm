@@ -21,6 +21,9 @@ spec:
       protocol: TCP
       port: 53
       targetPort: 53
+      {{- if eq .Values.kubernetes.networking "NodePort" }}
+      nodePort: 53
+      {{- end }}
   selector:
     app: dnsmasq
 ---
@@ -46,6 +49,9 @@ spec:
       protocol: UDP
       port: 53
       targetPort: 53
+      {{- if eq .Values.kubernetes.networking "NodePort" }}
+      nodePort: 53
+      {{- end }}
   selector:
     app: dnsmasq
 ---
