@@ -6,12 +6,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
-    metallb.universe.tf/allow-shared-ip: global
+    metallb.universe.tf/allow-shared-ip: squid
   {{- end }}
 spec:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip.squid }}
+  externalTrafficPolicy: Local
   {{- end }}
   {{- if eq .Values.kubernetes.networking "NodePort" }}
   type: NodePort
@@ -21,9 +22,6 @@ spec:
       protocol: TCP
       port: 3128
       targetPort: 3128
-      {{- if eq .Values.kubernetes.networking "NodePort" }}
-      nodePort: 3128
-      {{- end }}
   selector:
     app: squid
 ---

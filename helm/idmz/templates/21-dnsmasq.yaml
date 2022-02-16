@@ -11,7 +11,7 @@ metadata:
 spec:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip.shared }}
   {{- end }}
   {{- if eq .Values.kubernetes.networking "NodePort" }}
   type: NodePort
@@ -21,9 +21,6 @@ spec:
       protocol: TCP
       port: 53
       targetPort: 53
-      {{- if eq .Values.kubernetes.networking "NodePort" }}
-      nodePort: 53
-      {{- end }}
   selector:
     app: dnsmasq
 ---
@@ -39,10 +36,7 @@ metadata:
 spec:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
-  {{- end }}
-  {{- if eq .Values.kubernetes.networking "NodePort" }}
-  type: NodePort
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip.shared }}
   {{- end }}
   ports:
     - name: dnstcp

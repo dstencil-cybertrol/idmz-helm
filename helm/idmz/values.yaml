@@ -1,7 +1,10 @@
 kubernetes:
   storage: openebs-jiva-csi-default # use openebs-jiva-csi-default if using a multi-node cluster, obenebs-hostpath for single-node cluster.
-  networking: MetalLB # use MetalLB for a multi-node cluster, NodePort for single-node cluster.
-  metallb_ip: 192.168.1.156 # Used if netowrking is MetalLB
+  networking: MetalLB #MetalLB # use MetalLB for a multi-node cluster, NodePort for single-node cluster.
+#  metallb_ip: # Used if netowrking is MetalLB
+#    haproxy: 192.168.1.156 
+#    squid: 192.168.1.157
+#    shared: 192.168.1.158
 global:
   default_domain: 'domain.com'
   default_domain_ldap: 'DC=domain,DC=com'

@@ -6,12 +6,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   annotations:
-    metallb.universe.tf/allow-shared-ip: global
+    metallb.universe.tf/allow-shared-ip: haproxy
   {{- end }}
 spec:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip.haproxy }}
+  externalTrafficPolicy: Local
   {{- end }}
   {{- if eq .Values.kubernetes.networking "NodePort" }}
   type: NodePort
@@ -22,9 +23,6 @@ spec:
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{.targetPort }}
-      {{- if eq .Values.kubernetes.networking "NodePort" }}
-      nodePort: {{ .port }}
-      {{- end }}
     {{- end }}
   selector:
     app: haproxy

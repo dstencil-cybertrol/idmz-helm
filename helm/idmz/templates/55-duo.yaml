@@ -11,7 +11,7 @@ metadata:
 spec:
   {{- if eq .Values.kubernetes.networking "MetalLB" }}
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.kubernetes.metallb_ip }}
+  loadBalancerIP: {{ .Values.kubernetes.metallb_ip.shared }}
   {{- end }}
   {{- if eq .Values.kubernetes.networking "NodePort" }}
   type: NodePort
@@ -21,9 +21,6 @@ spec:
       protocol: UDP
       port: 1812
       targetPort: 1812
-      {{- if eq .Values.kubernetes.networking "NodePort" }}
-      nodePort: 1812
-      {{- end }}
   selector:
     app: duo-auth-proxy
 ---
