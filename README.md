@@ -14,8 +14,8 @@ newgrp microk8s
 microk8s enable storage
 microk8s enable metallb
 microk8s enable dns
-sudo systemctl enable iscsid
-microk8s enable openebs
+sudo systemctl enable iscsid #for openebs
+microk8s enable openebs #for openebs
 microk8s enable metrics-server
 ```
 
@@ -83,13 +83,15 @@ flux install
 export GITHUB_TOKEN=<your token here>
 ```
 
-### Add your cluster's git repo
+### Git Repo HTTPS
 
 ```bash
 flux create source git idmz-deployment --url=https://github.com/alphabet5/idmz-deployment --branch=main --username=alphabet5-bot --password=$GITHUB_TOKEN
 ```
 
 alphabet5-bot is a user with access only to this specific repository. Options are limited with https access.
+
+### Git Repo SSH Deploy Key
 
 Alternatively, you can create a deployment key and add the repository that way.
 
