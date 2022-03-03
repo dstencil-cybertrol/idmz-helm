@@ -75,6 +75,7 @@ helm install idmz alphabet5-idmz/idmz
 
 ```bash
 flux install
+flux check # Always good to run before running flux commands.
 ```
 
 ### Generate a personal access token and export the value
