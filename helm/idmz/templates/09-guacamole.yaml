@@ -36,6 +36,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 4822
+          volumeMounts:
+            - name: guac-shared-volume
+              mountPath: "/shared/"
           startupProbe:
             tcpSocket:
               port: 4822
@@ -51,6 +54,9 @@ spec:
               port: 4822
             initialDelaySeconds: 0
             periodSeconds: 1
+      volumes:
+        - name: guac-shared-volume
+          emptyDir: {}
 ---
 # Guacamole properties configmap
 apiVersion: v1
@@ -177,8 +183,6 @@ spec:
               mountPath: "/etc/guacamole/logback.xml"
               subPath: "logback.xml"
             {{- end }}
-            - name: guac-shared-volume
-              mountPath: "/shared/"
             - name: guac-extensions-volume
               mountPath: "/etc/guacamole/extensions/"
           startupProbe:
@@ -205,8 +209,6 @@ spec:
           configMap:
             name: guacamole-logback-configmap
         {{- end }}
-        - name: guac-shared-volume
-          emptyDir: {}
         - name: guac-extensions-volume
           emptyDir: {}
 {{ end }}
