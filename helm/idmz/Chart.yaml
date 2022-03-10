@@ -1,14 +1,14 @@
 apiVersion: v2
 name: idmz
-version: "0.0.22"
+version: "0.0.23-1"
 description: Helm chart for IDMZs.
 type: application
 keywords:
   - idmz
   - dmz
-home: https://github.com/alphabet5/idmz-helm
+home: https://github.com/cybertrol-engineering/idmz-helm
 sources:
-  - https://github.com/alphabet5/idmz-helm
+  - https://github.com/cybertrol-engineering/idmz-helm
 # dependencies:
 #   - name: sealed-secrets
 #     version: ~2.1.2

@@ -1,0 +1,14 @@
+{{- if Values.guacamole.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-guacd" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 4822
+      targetPort: 4822
+  selector:
+    app: guacd
+{{- end }}
