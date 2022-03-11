@@ -1,4 +1,4 @@
-{{- if Values.guacamole.enabled }}
+{{- if .Values.guacamole.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,7 +7,7 @@ metadata:
 spec:
   ports:
     - protocol: TCP
-      port: 4822
+      port: {{ .Values.guacamole.guacdPort }}
       targetPort: 4822
   selector:
     app: guacd

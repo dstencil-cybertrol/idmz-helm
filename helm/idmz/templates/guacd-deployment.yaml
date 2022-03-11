@@ -1,11 +1,11 @@
-{{- if Values.guacamole.enabled }}
+{{- if .Values.guacamole.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ printf "%s-guacd" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ Values.guacamole.replicas }}
+  replicas: {{ .Values.guacamole.replicas }}
   selector:
     matchLabels:
       app: guacd
@@ -17,7 +17,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: {{ printf "%s-guacd" .Release.Name }}
-          image: guacamole/guacd
+          image: guacamole/guacd:{{ .Values.guacamole.guacdVersion }}
           imagePullPolicy: Always
           ports:
             - containerPort: 4822
@@ -32,12 +32,12 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 4822
-            initialDelaySeconds: 0
+            initialDelaySeconds: 1
             periodSeconds: 1
           livenessProbe:
             tcpSocket:
               port: 4822
-            initialDelaySeconds: 0
+            initialDelaySeconds: 1
             periodSeconds: 1
       volumes:
         - name: {{ printf "%s-guacd-shared-volume" .Release.Name }}

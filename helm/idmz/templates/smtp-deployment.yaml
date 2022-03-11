@@ -1,0 +1,70 @@
+{{- if .Values.smtp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-smtp-relay" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.smtp.replicas }}
+  selector:
+    matchLabels:
+      app: smtp-relay
+  template:
+    metadata:
+      labels:
+        app: smtp-relay
+    spec:
+      containers:
+        - name: {{ printf "%s-smtp-relay" .Release.Name }}
+          image: namshi/smtp:{{ .Values.smtp.version }}
+          imagePullPolicy: Always
+          env:
+            {{- if eq .Values.smtp.type "gmail" }}
+            - name: GMAIL_USER
+              value: {{ .Values.smtp.gmailAddress | quote }}
+            - name: RELAY_NETWORKS
+              value: { { .Values.smtp.relayNetworks | quote } }
+            {{- if .Values.smtp.secrets.nextHopPassword }}
+            - name: GMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-smtp" .Release.Name }}
+                  key: next_hop_password
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.smtp.type "smarthost" }}
+            - name: SMARTHOST_ADDRESS
+              value: {{ .Values.smtp.smartHostAddress | quote }}
+            - name: SMARTHOST_PORT
+              value: {{ .Values.smtp.smartHostPort | quote }}
+            - name: RELAY_NETWORKS
+              value: {{ .Values.smtp.relayNetworks | quote }}
+            - name: SMARTHOST_USER
+              value: {{ .Values.smtp.smartHostUser | quote }}
+            {{- if .Values.smtp.secrets.nextHopPassword }}
+            - name: SMARTHOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-smtp" .Release.Name }}
+                  key: next_hop_password
+            {{- end }}
+            {{- end }}
+          ports:
+            - containerPort: 25
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: 25
+            failureThreshold: 30
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 25
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 25
+            initialDelaySeconds: 0
+            periodSeconds: 1
+{{- end }}

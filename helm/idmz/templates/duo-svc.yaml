@@ -1,0 +1,21 @@
+{{- if .Values.duo.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-duo-auth-proxy" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.duo.sharedIp }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.duo.loadBalancerIpAddress }}
+  ports:
+    - name: radius
+      protocol: UDP
+      port: {{ .Values.duo.radiusPort }}
+      targetPort: 1812
+  selector:
+    app: {{ printf "%s-duo-auth-proxy" .Release.Name }}
+{{- end }}

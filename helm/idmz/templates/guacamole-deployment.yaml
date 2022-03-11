@@ -1,11 +1,11 @@
-{{- if Values.guacamole.enabled }}
+{{- if .Values.guacamole.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { printf "%s-guacamole" .Release.Name } }
-  namespace: { { .Release.Namespace | quote } }
+  name: {{ printf "%s-guacamole" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ Values.guacamole.replicas }}
+  replicas: {{ .Values.guacamole.replicas }}
   selector:
     matchLabels:
       app: guacamole
@@ -18,6 +18,7 @@ spec:
       initContainers:
         - name: {{ printf "%s-guacamole-init" .Release.Name }}
           image: alphabet5/guacamole
+          imagePullPolicy: Always
           command:
             - '/bin/bash'
             - '-c'
@@ -35,39 +36,41 @@ spec:
             - >
               sed -i 's#      </Host>#        <Valve className="org.apache.catalina.valves.RemoteIpValve"\n               internalProxies=".*"\n               remoteIpHeader="x-forwarded-for"\n               remoteIpProxiesHeader="x-forwarded-by"\n               protocolHeader="x-forwarded-proto" />\n      </Host>#' /usr/local/tomcat/conf/server.xml; mkdir /etc/guacamole; mkdir /etc/guacamole/extensions; cp /opt/guacamole/ldap/guacamole-auth-ldap-*.jar /etc/guacamole/extensions; exec /opt/guacamole/bin/start.sh
           env:
+          {{- if .Values.guacamole.sql.enabled }}
             - name: MYSQL_USER
-              value: {{ .Values.mysql.mysql_username }}
+              value: {{ .Values.guacamole.sql.mysqlUser }}
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: {{ printf "%s-guacamole" .Release.Name }}
                   key: mysql_password
             - name: MYSQL_DATABASE
-              value: {{ .Values.mysql.mysql_database }}
-            - name: GUACD_HOSTNAME
-              value: guacd-service
+              value: {{ .Values.guacamole.sql.usersDatabase }}
             - name: MYSQL_HOSTNAME
-              value: guac-mysql-service
+              value: {{ printf "%s-mysql" .Release.Name }}
+          {{- end }}
+            - name: GUACD_HOSTNAME
+              value: {{ printf "%s-guacd" .Release.Name }}
             - name: GUACAMOLE_HOME
               value: /etc/guacamole
             - name: LDAP_SEARCH_BIND_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ldap-secret
-                  key: ldap_password
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: ldap_bind_password
           ports:
             - name: guacamole
               containerPort: 8080
           volumeMounts:
-            - name: guacamole-properties-volume
+            - name: {{ printf "%s-guacamole-properties-volume" .Release.Name }}
               mountPath: "/etc/guacamole/guacamole.properties"
               subPath: "guacamole.properties"
             {{- if .Values.guacamole.debug }}
-            - name: guacamole-logback-volume
+            - name: {{ printf "%s-guacamole-logback-volume" .Release.Name }}
               mountPath: "/etc/guacamole/logback.xml"
               subPath: "logback.xml"
             {{- end }}
-            - name: guac-extensions-volume
+            - name: {{ printf "%s-guacamole-extensions-volume" .Release.Name }}
               mountPath: "/etc/guacamole/extensions/"
           startupProbe:
             tcpSocket:
@@ -77,21 +80,27 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 8080
-            initialDelaySeconds: 0
+            initialDelaySeconds: 1
             periodSeconds: 1
           livenessProbe:
             tcpSocket:
               port: 8080
-            initialDelaySeconds: 0
+            initialDelaySeconds: 1
             periodSeconds: 1
       volumes:
-        - name: guacamole-properties-volume
+        - name: {{ printf "%s-guacamole-properties-volume" .Release.Name }}
           configMap:
-            name: guacamole-properties-configmap
+            name: {{ printf "%s-guacamole" .Release.Name }}
+            items:
+            - key: guacamole.properties
+              path: guacamole.properties
         {{- if .Values.guacamole.debug }}
-        - name: guacamole-logback-volume
+        - name: {{ printf "%s-guacamole-logback-volume" .Release.Name }}
           configMap:
-            name: guacamole-logback-configmap
+            name: {{ printf "%s-guacamole" .Release.Name }}
+            items:
+            - key: logback.xml
+              path: logback.xml
         {{- end }}
         - name: {{ printf "%s-guacamole-extensions-volume" .Release.Name }}
           emptyDir: {}
