@@ -1,0 +1,23 @@
+{{ if .Values.haproxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-haproxy" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.haproxy.sharedIp }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: haproxy
+  {{- end }}
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.haproxy.loadBalancerIpAddress }}
+  ports:
+    {{- range .Values.haproxy.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{.targetPort }}
+    {{- end }}
+  selector:
+    app: haproxy
+{{- end }}

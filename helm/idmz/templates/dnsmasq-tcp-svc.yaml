@@ -1,0 +1,21 @@
+{{- if .Values.dnsmasq.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-dnsmasq-tcp" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- if eq .Values.dnsmasq.sharedIp }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.dnsmasq.loadBalancerIpAddress }}
+  ports:
+    - name: dnstcp
+      protocol: TCP
+      port: 53
+      targetPort: 53
+  selector:
+    app: dnsmasq
+{{- end }}

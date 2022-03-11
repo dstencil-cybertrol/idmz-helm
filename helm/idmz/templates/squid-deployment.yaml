@@ -1,0 +1,52 @@
+{{ if .Values.squid.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-squid" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.squid.replicas }}
+  selector:
+    matchLabels:
+      app: squid
+  template:
+    metadata:
+      labels:
+        app: squid
+    spec:
+      containers:
+        - name: {{ printf "%s-squid" .Release.Name }}
+          image: alphabet5/squid:{{ .Values.squid.version }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3128
+              protocol: TCP
+          volumeMounts:
+            - name: {{ printf "%s-squid-conf-volume" .Release.Name }}
+              mountPath: "/etc/squid/squid.conf"
+              subPath: "squid.conf"
+            - name: {{ printf "%s-squid-whitelists-volume" .Release.Name }}
+              mountPath: "/whitelists/"
+          startupProbe:
+            tcpSocket:
+              port: 3128
+            failureThreshold: 30
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 3128
+            initialDelaySeconds: 0
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 3128
+            initialDelaySeconds: 0
+            periodSeconds: 1
+      volumes:
+        - name: {{ printf "%s-squid-conf-volume" .Release.Name }}
+          configMap:
+            name: {{ printf "%s-squid-conf" .Release.Name }}
+        - name: {{ printf "%s-squid-whitelists-volume" .Release.Name }}
+          configMap:
+            name: {{ printf "%s-squid-whitelists" .Release.Name }}
+{{- end }}
