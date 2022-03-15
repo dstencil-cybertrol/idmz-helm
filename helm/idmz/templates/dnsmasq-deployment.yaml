@@ -14,10 +14,11 @@ spec:
       labels:
         app: dnsmasq
     spec:
+      restartPolicy: {{ .Values.dnsmasq.restartPolicy  | quote }}
       containers:
         - name: {{ printf "%s-dnsmasq" .Release.Name }}
           image: alphabet5/dnsmasq:{{ .Values.dnsmasq.version }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.dnsmasq.imagePullPolicy  | quote }}
           args:
             {{- range .Values.dnsmasq.args }}
             - {{ . | quote }}

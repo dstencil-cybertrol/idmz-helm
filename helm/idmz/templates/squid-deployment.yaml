@@ -11,13 +11,16 @@ spec:
       app: squid
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/squid-configmap.yaml") . | sha256sum }}
       labels:
         app: squid
     spec:
+      restartPolicy: {{ .Values.squid.restartPolicy | quote }}
       containers:
         - name: {{ printf "%s-squid" .Release.Name }}
           image: alphabet5/squid:{{ .Values.squid.version }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.squid.imagePullPolicy | quote }}
           ports:
             - containerPort: 3128
               protocol: TCP

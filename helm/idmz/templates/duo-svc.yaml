@@ -14,8 +14,8 @@ spec:
   ports:
     - name: radius
       protocol: UDP
-      port: {{ .Values.duo.radiusPort }}
+      port: 1812
       targetPort: 1812
   selector:
-    app: {{ printf "%s-duo-auth-proxy" .Release.Name }}
+    app: duo-auth-proxy
 {{- end }}

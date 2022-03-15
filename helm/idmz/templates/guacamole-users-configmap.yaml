@@ -6,12 +6,12 @@ metadata:
   name: {{ printf "%s-guacamole-users" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 data:
-  {{- if hasKey .Values.guacamole "manual_connections" }}
+  {{- if .Values.guacamole.users.manualConnections }}
   manual-connections.yaml: |
-{{ tpl .Values.guacamole.manualConnections . | indent 4 }}
+{{ tpl .Values.guacamole.users.manualConnections . | indent 4 }}
   {{- end }}
-  {{- if hasKey .Values.guacamole "autoConnections" }}
+  {{- if .Values.guacamole.users.autoConnections }}
   auto-connections.yaml: |
-{{ tpl .Values.guacamole.autoConnections . | indent 4 }}
+{{ tpl .Values.guacamole.users.autoConnections . | indent 4 }}
   {{- end }}
 {{- end }}

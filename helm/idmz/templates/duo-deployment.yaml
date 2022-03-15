@@ -11,13 +11,16 @@ spec:
       app: duo-auth-proxy
   template:
     metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/duo-secret.yaml") . | sha256sum }}
       labels:
         app: duo-auth-proxy
     spec:
+      restartPolicy: {{ .Values.duo.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-duo-auth-proxy" .Release.Name }}
           image: alphabet5/duoauthproxy:{{ .Values.duo.version }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.duo.imagePullPolicy | quote}}
           env:
             - name: DUO_AD_HOST
               value: {{ tpl .Values.duo.duoAdHost . | quote }}
@@ -29,7 +32,7 @@ spec:
                   name: {{ printf "%s-duo" .Release.Name }}
                   key: duo_ad_password
             - name: DUO_AD_SEARCH_DN
-              value: {{ tpl .Values.duo.duoAdSeachDn . | quote}}
+              value: {{ tpl .Values.duo.duoAdSearchDn . | quote}}
             - name: DUO_INTEGRATION_KEY
               valueFrom:
                 secretKeyRef:
@@ -51,7 +54,7 @@ spec:
                   name: {{ printf "%s-duo" .Release.Name }}
                   key: duo_radius_secret
             - name: DUO_FAILMODE
-              value: {{ .Values.duo.duo_failmode }}
+              value: {{ .Values.duo.duoFailmode | quote }}
             - name: DUO_PORT
               value: "1812"
           ports:

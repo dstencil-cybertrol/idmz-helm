@@ -11,10 +11,12 @@ spec:
       app: mysql
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/mysql-configmap.yaml") . | sha256sum }}
       labels:
         app: mysql
     spec:
-      restartPolicy: Always
+      restartPolicy: {{ .Values.guacamole.sql.restartPolicy | quote }}
       initContainers:
         - name: {{ printf "%s-mysql-init" .Release.Name }}
           image: guacamole/guacamole:{{ .Values.guacamole.version }}
@@ -27,8 +29,8 @@ spec:
               mountPath: "/mysqlinit/"
       containers:
         - name: {{ printf "%s-mysql" .Release.Name }}
-          image: {{ .Values.gaucamole.sql.image }}:{{ .Values.guacamole.sql.version }}
-          imagePullPolicy: Always
+          image: {{ .Values.guacamole.sql.image }}:{{ .Values.guacamole.sql.version }}
+          imagePullPolicy: {{ .Values.guacamole.sql.imagePullPolicy | quote }}
           env:
             - name: MYSQL_USER
               value: {{ .Values.guacamole.sql.mysqlUser }}
@@ -76,7 +78,7 @@ spec:
                 - 'ping'
                 - '-h'
                 - 'localhost'
-            initialDelaySeconds: 0
+            initialDelaySeconds: 1
             periodSeconds: 1
           livenessProbe:
             exec:
@@ -85,7 +87,7 @@ spec:
                 - 'ping'
                 - '-h'
                 - 'localhost'
-            initialDelaySeconds: 0
+            initialDelaySeconds: 1
             periodSeconds: 1
           resources:
             requests:
@@ -95,7 +97,7 @@ spec:
               memory: "128Mi"
               cpu: "500m"
       volumes:
-        - name: { { printf "%s-mysql-guac-init-volume" .Release.Name } }
+        - name: {{ printf "%s-mysql-guac-init-volume" .Release.Name }}
           emptyDir: { }
         - name: {{ printf "%s-mysql-init-volume" .Release.Name }}
           configMap:

@@ -1,4 +1,4 @@
-{{- if Values.guacamole.enabled }}
+{{- if .Values.guacamole.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

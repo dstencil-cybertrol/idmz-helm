@@ -5,7 +5,7 @@ metadata:
   name: {{ printf "%s-guacd" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ .Values.guacamole.replicas }}
+  replicas: {{ .Values.guacamole.guacd.replicas }}
   selector:
     matchLabels:
       app: guacd
@@ -14,11 +14,11 @@ spec:
       labels:
         app: guacd
     spec:
-      restartPolicy: Always
+      restartPolicy: {{ .Values.guacamole.guacd.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-guacd" .Release.Name }}
-          image: guacamole/guacd:{{ .Values.guacamole.guacdVersion }}
-          imagePullPolicy: Always
+          image: guacamole/guacd:{{ .Values.guacamole.guacd.version }}
+          imagePullPolicy: {{ .Values.guacamole.guacd.imagePullPolicy | quote}}
           ports:
             - containerPort: 4822
           volumeMounts:

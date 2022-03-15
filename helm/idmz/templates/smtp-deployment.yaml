@@ -11,19 +11,22 @@ spec:
       app: smtp-relay
   template:
     metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/smtp-secret.yaml") . | sha256sum }}
       labels:
         app: smtp-relay
     spec:
+      restartPolicy: {{ .Values.smtp.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-smtp-relay" .Release.Name }}
           image: namshi/smtp:{{ .Values.smtp.version }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.smtp.imagePullPolicy | quote}}
           env:
             {{- if eq .Values.smtp.type "gmail" }}
             - name: GMAIL_USER
               value: {{ .Values.smtp.gmailAddress | quote }}
             - name: RELAY_NETWORKS
-              value: { { .Values.smtp.relayNetworks | quote } }
+              value: {{ .Values.smtp.relayNetworks | quote }}
             {{- if .Values.smtp.secrets.nextHopPassword }}
             - name: GMAIL_PASSWORD
               valueFrom:

@@ -4,10 +4,8 @@ kind: Service
 metadata:
   name: {{ printf "%s-dnsmasq-tcp" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
-  {{- if eq .Values.dnsmasq.sharedIp }}
   annotations:
     metallb.universe.tf/allow-shared-ip: global
-  {{- end }}
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ .Values.dnsmasq.loadBalancerIpAddress }}

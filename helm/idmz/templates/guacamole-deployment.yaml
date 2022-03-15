@@ -11,14 +11,17 @@ spec:
       app: guacamole
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/guacamole-users-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/guacamole-secret.yaml") . | sha256sum }}
       labels:
         app: guacamole
     spec:
-      restartPolicy: Always
+      restartPolicy: {{ .Values.guacamole.restartPolicy  | quote }}
       initContainers:
         - name: {{ printf "%s-guacamole-init" .Release.Name }}
-          image: alphabet5/guacamole
-          imagePullPolicy: Always
+          image: alphabet5/guacamole:{{ .Values.guacamole.init.version }}
+          imagePullPolicy: {{ .Values.guacamole.init.imagePullPolicy  | quote }}
           command:
             - '/bin/bash'
             - '-c'
@@ -29,7 +32,7 @@ spec:
       containers:
         - name: {{ printf "%s-guacamole" .Release.Name }}
           image: guacamole/guacamole:{{ .Values.guacamole.version }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.guacamole.imagePullPolicy  | quote }}
           command:
             - "/bin/bash"
             - "-c"

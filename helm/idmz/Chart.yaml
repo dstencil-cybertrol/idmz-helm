@@ -1,7 +1,7 @@
 apiVersion: v2
 name: idmz
-version: "0.0.23-1"
-description: Helm chart for IDMZs.
+version: "0.0.23-alpha"
+description: Helm chart for common IDMZ applications.
 type: application
 keywords:
   - idmz
@@ -9,18 +9,9 @@ keywords:
 home: https://github.com/cybertrol-engineering/idmz-helm
 sources:
   - https://github.com/cybertrol-engineering/idmz-helm
-# dependencies:
-#   - name: sealed-secrets
-#     version: ~2.1.2
-#     repository: https://bitnami-labs.github.io/sealed-secrets
-#   - name: reloader
-#     version: ~0.0.104
-#     repository: https://stakater.github.io/stakater-charts
-#   - name: cert-manager
-#     version: ~1.6.1
-#     repository: https://charts.jetstack.io
-maintainers: # (optional)
+maintainers:
   - name: alphabet5
     url: https://github.com/alphabet5
-appVersion: "0.0.2"
+  - name: tlitke5
+    url: https://github.com/tlitke5
 deprecated: false

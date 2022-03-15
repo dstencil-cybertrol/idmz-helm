@@ -1,48 +1,245 @@
+global:
+  baseDomain: # testdomain.com
+  ldapBaseDn: # DC=testdomain,DC=com
+
+ingress:
+  loadBalancerIpAddress:
+
+certManager:
+  enabled: true
+  secrets:
+    route53SecretAccessKey:
+  email: 
+  letsEncryptServer:
+  route53Region:
+  route53HostedZoneId:
+  route53AccessKeyID:
+
+squid:
+  enabled: true
+  version: latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  loadBalancerIpAddress:
+  squidPort: 3128
+  whitelists:
+    rockwell.txt: |
+      .rockwellautomation.custhelp.com
+      .rockwellautomation.com
+    symantec.txt: |
+      liveupdate.symantec.com
+      liveupdate.symantecliveupdate.com
+      ent-shasta.rrs.symantec.com
+      tses.broadcom.com
+      telemetry.broadcom.com
+      ent-shasta-mr-clean.symantec.com
+      central.ss.crsi.symantec.com
+      central.nrsi.symantec.com
+      central.avsi.symantec.com
+      central.b6.crsi.symantec.com
+      central.crsi.symantec.com
+      stnd-avpg.crsi.symantec.com
+      avs-avpg.crsi.symantec.com
+      stnd-ipsg.crsi.symantec.com
+      bash-avpg.crsi.symantec.com
+      sp.cwfservice.net
+      tus1gwynwapex01.symantec.com
+      faults.qalabs.symantec.com
+      faults.symantec.com
+      linux-repo.us.securitycloud.symantec.com
+    windows_updates.txt: |
+      asdf.windowsupdate.microsoft.com
+      .update.microsoft.com
+      .windowsupdate.com
+      .download.windowsupdate.com
+      download.microsoft.com
+      wustat.windows.com
+      ntservicepack.microsoft.com
+      go.microsoft.com
+      dl.delivery.mp.microsoft.com
+  cfg: |
+    #Set allowed ports
+    acl SSL_ports port 443
+    acl Safe_ports port 80          # http
+    acl Safe_ports port 443         # https
+    acl CONNECT method CONNECT
+
+    # Block anything that is not ports 80/443
+    http_access deny !Safe_ports
+    http_access deny CONNECT !SSL_ports
+
+    #Disable caching
+    cache deny all
+
+    #Support email for failure page.
+    cache_mgr support@domain.local
+
+    #Set source clients
+    acl test_src src all
+
+    #Set port number
+    http_port 3128
+
+    #Allow All
+    http_access allow all
+    http_access allow CONNECT all
+
+dnsmasq:
+  enabled: true
+  version: latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  loadBalancerIpAddress:
+  args:
+    - #--server=192.168.1.159
+    - #--server=/domain.com/192.168.1.159
+
+smtp:
+  enabled: true
+  secrets:
+    nextHopPassword:
+  version: latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  sharedIp: true
+  loadBalancerIpAddress:
+  smtpPort: 25
+  relayNetworks:
+  type: #gmail or smarthost
+  gmailAddress: #test@gmail.com
+  smartHostAddress:
+  smartHostPort:
+  smartHostUser:
+
+duo:
+  enabled: true
+  secrets:
+    duoAdPassword:
+    duoApiHostname:
+    duoIntegrationKey:
+    duoRadiusSecret:
+    duoSecretKey:
+  version: latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  loadBalancerIpAddress:
+  sharedIp: true
+  duoAdHost: '{{ .Values.global.baseDomain }}'
+  duoAdUser: DuoUser
+  duoAdSearchDn: 'CN=Users,{{ .Values.global.ldapBaseDn }}'
+  duoFailmode: secure
+
 guacamole:
   enabled: true
+  secrets:
+    guacAdminPassword:
+    mysqlPassword:
+    mysqlRootPassword:
+    ldapBindPassword:
   version: 1.4.0
-  guacdVersion: latest
-  debug: false
   replicas: 1
-  guacdPort: 4822
-  guacamolePort: 8080
-  sharedVolumeSize: 2G
+  restartPolicy: Always
+  imagePullPolicy: Always
+  dnsName:
+  ldapBindUser:
+  debug: false
   properties: |
-  	enable-environment-properties: true
+    enable-environment-properties: true
     ldap-encryption-method: none
-    ldap-group-base-dn: {{ .Values.global.default_domain_ldap }}
+    ldap-group-base-dn: {{ .Values.global.ldapBaseDn }}
     ldap-group-search-filter: (objectCategory=group)
     ldap-group-name-attribute: cn
-    ldap-hostname: {{ .Values.global.default_domain }}
+    ldap-hostname: {{ .Values.global.ldapDomain }}
     ldap-port: 389
-    ldap-search-bind-dn: CN=guacuser,CN=Users,{{ .Values.global.default_domain_ldap }}
-    ldap-user-base-dn: CN=Users,{{ .Values.global.default_domain_ldap }}
+    ldap-search-bind-dn: CN={{ .Values.guacamole.ldapBindUser }},CN=Users,{{ .Values.global.ldapBaseDn }}
+    ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
     ldap-user-search-filter: (objectCategory=*)
     ldap-username-attribute: samAccountName
-  secrets:
-  	guacAdminPassword:
-  	mysqlPassword:
-  	mysqlRootPassword:
+  guacd:
+    version: latest
+    replicas: 1
+    restartPolicy: Always
+    imagePullPolicy: Always
+  init:
+    version: latest
+    imagePullPolicy: Always
   sql:
-  	enabled: true
-  	version: latest
-  	replicas: 1
-  	mysqlUser: mysqluser
-  	usersDatabase: guacdb
-  	mysqlVolumeSize: 2G
+    enabled: true
+    image: mariadb
+    version: latest
+    replicas: 1
+    restartPolicy: Always
+    imagePullPolicy: Always
+    mysqlUser: guacuser
+    usersDatabase: guacdb
   users:
-  	enabled: true
-  	version: latest
-  	replicas: 1
-  	debug: 'false'
-  	manual_only: 'false'
-  	auto_connection_dns: 'false'
-  	auto_connection_dns_resolver: '192.168.1.159'
-  	guac_admin_groups: 'GuacAdmin'
-  	ldap_base_dn: '{{ .Values.global.default_domain_ldap }}'
-  	ldap_computer_filter: '(objectCategory=Computer)'
-  	ldap_group_name_from_conn_name_regex: '(.*?)\..+'
-  	ldap_group_name_mod: '{regex}'
-  	refresh_speed: '300'
-  	manualConnections:
-  	autoConnections:
+    enabled: true
+    version: latest
+    replicas: 1
+    restartPolicy: Always
+    imagePullPolicy: Always
+    debug: true
+    autoConnectionDns: false
+    autoConnectionDnsResolver:
+    guacAdminGroups:
+    ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
+    ldapComputerFilter: (objectCategory=Computer)
+    ldapGroupNameFromConnNameRegex: (.*?)\..+
+    ldapGroupNameMod: {regex}
+    refreshSpeed: 300
+    manualOnly: false
+    manualConnections: |
+      manual_connections:
+        defaults:
+          connection:
+            protocol: 'rdp'
+          parameters:
+            console-audio: 'true'
+            create-drive-path: 'true'
+            drive-name: 'shared'
+            drive-path: '/shared'
+            enable-drive: 'true'
+            enable-printing: 'true'
+            ignore-cert: 'true'
+            port: '3389'
+            printer-name: 'RemotePrinter'
+            security: 'nla'
+            username: '${GUAC_USERNAME}'
+            password: '${GUAC_PASSWORD}'
+            domain: '{{ .Values.global.baseDomain }}'
+        connections:
+         - defaults: true
+           connection:
+             connection_name: 'TEST-CONNECTION.domain.com - 192.168.1.160'
+           parameters:
+             hostname: '192.168.1.160'
+      #parameters section and specific paramters are only required if they are not the defaults.
+      # If manual connections are specified, permissions are required to be set for all manual connections.
+      # List all ldap groups under the connection_name for each manual connection. Any user in the ldap group
+      # will have permission to connect with the specific connection.
+      manual_permissions:
+        "Domain Users":
+          - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+        ThisIsATestGroup:
+          - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    autoConnections: |
+      connection:
+        protocol: 'rdp'
+      parameters: # Connection parameters are defined here under 'Configuring Connections': https://guacamole.apache.org/doc/gug/configuring-guacamole.html
+        console-audio: 'true'
+        create-drive-path: 'true'
+        drive-name: 'shared'
+        drive-path: '/shared'
+        enable-drive: 'true'
+        enable-printing: 'true'
+        ignore-cert: 'true'
+        port: '3389'
+        printer-name: 'RemotePrinter'
+        security: 'nla'
+        username: '${GUAC_USERNAME}'
+        password: '${GUAC_PASSWORD}'
+        domain: '{{ .Values.global.baseDomain }}'

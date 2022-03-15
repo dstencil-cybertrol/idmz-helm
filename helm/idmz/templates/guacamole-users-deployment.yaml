@@ -11,17 +11,24 @@ spec:
       app: guacamole-users
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/guacamole-users-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/guacamole-secret.yaml") . | sha256sum }}
       labels:
         app: guacamole-users
     spec:
-      restartPolicy: Always
+      restartPolicy: {{ .Values.guacamole.users.restartPolicy | quote }}
       containers:
         - name: {{ printf "%s-guacamole-users" .Release.Name }}
           image: alphabet5/guacamole-users:{{ .Values.guacamole.users.version }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.guacamole.users.imagePullPolicy | quote }}
           env:
             - name: DEBUG
               value: {{ .Values.guacamole.users.debug | quote }}
+            - name: MYSQL_HOSTNAME
+              value: {{ printf "%s-mysql" .Release.Name }}
+            - name: MYSQL_DATABASE
+              value: {{ .Values.guacamole.sql.usersDatabase | quote }}
             - name: MYSQL_USER
               value: {{ .Values.guacamole.sql.mysqlUser | quote }}
             - name: MYSQL_PASSWORD
@@ -29,45 +36,41 @@ spec:
                 secretKeyRef:
                   name: {{ printf "%s-guacamole" .Release.Name }}
                   key: mysql_password
-            - name: MYSQL_DATABASE
-              value: {{ .Values.gaucamole.sql.usersDatabase | quote }}
-            - name: MYSQL_HOSTNAME
-              value: {{ printf "%s-mysql" .Release.Name }}
-            - name: LDAP_SEARCH_BIND_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-guacamole" .Release.Name }}
-                  key: ldap_bind_password
             - name: CFG_AUTO_CONNECTION_DNS
               value: {{ .Values.guacamole.users.autoConnectionDns | quote }}
             - name: CFG_AUTO_CONNECTION_DNS_RESOLVER
               value: {{ .Values.guacamole.users.autoConnectionDnsResolver | quote }}
             - name: GUAC_ADMIN_GROUPS
-              value: {{ .Values.guacamole.users.guacAdminGroup | quote }}
+              value: {{ .Values.guacamole.users.guacAdminGroups | quote }}
             - name: LDAP_BASE_DN
-              value: {{ tpl .Values.guacamole_users.ldap_base_dn . | quote }}
+              value: {{ tpl .Values.guacamole.users.ldapBaseDn . | quote }}
             - name: LDAP_COMPUTER_FILTER
-              value: {{ .Values.guacamole_users.ldap_computer_filter | quote }}
+              value: {{ .Values.guacamole.users.ldapComputerFilter | quote }}
             - name: LDAP_GROUP_NAME_FROM_CONN_NAME_REGEX
-              value: {{ .Values.guacamole_users.ldap_group_name_from_conn_name_regex | quote }}
+              value: {{ .Values.guacamole.users.ldapGroupNameFromConnNameRegex | quote }}
             - name: LDAP_GROUP_NAME_MOD
-              value: {{ .Values.guacamole_users.ldap_group_name_mod | quote }}
+              value: {{ .Values.guacamole.users.ldapGroupNameMod | quote }}
+            - name: LDAP_SEARCH_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: ldap_bind_password
             - name: REFRESH_SPEED
-              value: {{ .Values.guacamole_users.refresh_speed | quote }}
+              value: {{ .Values.guacamole.users.refreshSpeed | quote }}
             - name: MANUAL_ONLY
-              value: {{ .Values.guacamole_users.manual_only | quote }}
+              value: {{ .Values.guacamole.users.manualOnly | quote }}
           volumeMounts:
-          {{- if hasKey .Values.guacamole_users "manual_connections" }}
+          {{- if .Values.guacamole.users.manualConnections }}
             - name: guacamole-users-volume
               mountPath: "/configs/manual-connections.yaml"
               subPath: "manual-connections.yaml"
           {{- end }}
-          {{- if hasKey .Values.guacamole_users "auto_connections" }}
-            - name: guacamole-users-volume
+          {{- if .Values.guacamole.users.autoConnections }}
+            - name: {{ printf "%s-guacamole-users-volume" .Release.Name }}
               mountPath: "/configs/auto-connections.yaml"
               subPath: "auto-connections.yaml"
           {{- end }}
-            - name: guacamole-properties-volume
+            - name: {{ printf "%s-guacamole-properties-volume" .Release.Name }}
               mountPath: "/configs/guacamole.properties"
               subPath: "guacamole.properties"
           resources:
@@ -78,10 +81,13 @@ spec:
               memory: "128Mi"
               cpu: "500m"
       volumes:
-        - name: guacamole-users-volume
+        - name: {{ printf "%s-guacamole-users-volume" .Release.Name }}
           configMap:
-            name: guacamole-users-configmap
-        - name: guacamole-properties-volume
+            name: {{ printf "%s-guacamole-users" .Release.Name }}
+        - name: {{ printf "%s-guacamole-properties-volume" .Release.Name }}
           configMap:
-            name: guacamole-properties-configmap
+            name: {{ printf "%s-guacamole" .Release.Name }}
+            items:
+            - key: guacamole.properties
+              path: guacamole.properties
 {{- end }}
