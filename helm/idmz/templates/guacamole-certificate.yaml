@@ -1,0 +1,13 @@
+{{ if .Values.guacamole.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ printf "%s-guacamole-tls" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  secretName: {{ printf "%s-guacamole-tls" .Release.Name }}
+  issuerRef:
+    name: letsencrypt
+  dnsNames:
+    - {{ .Values.guacamole.dnsName }}
+{{- end }}

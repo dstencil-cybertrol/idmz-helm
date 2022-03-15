@@ -1,0 +1,25 @@
+{{- if .Values.guacamole.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-guacamole" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  guacamole.properties: |
+{{ tpl .Values.guacamole.properties . | indent 4 }}
+{{- if .Values.guacamole.debug }}
+  logback.xml: |-
+    <configuration>
+        <!-- Appender for debugging -->
+        <appender name="GUAC-DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+        <!-- Log at DEBUG level -->
+        <root level="debug">
+            <appender-ref ref="GUAC-DEBUG"/>
+        </root>
+    </configuration>
+{{- end }}
+{{- end }}

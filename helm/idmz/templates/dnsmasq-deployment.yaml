@@ -1,0 +1,41 @@
+{{- if .Values.dnsmasq.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-dnsmasq" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.dnsmasq.replicas }}
+  selector:
+    matchLabels:
+      app: dnsmasq
+  template:
+    metadata:
+      labels:
+        app: dnsmasq
+    spec:
+      restartPolicy: {{ .Values.dnsmasq.restartPolicy  | quote }}
+      containers:
+        - name: {{ printf "%s-dnsmasq" .Release.Name }}
+          image: alphabet5/dnsmasq:{{ .Values.dnsmasq.version }}
+          imagePullPolicy: {{ .Values.dnsmasq.imagePullPolicy  | quote }}
+          args:
+            {{- range .Values.dnsmasq.args }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 53
+              protocol: UDP
+          readinessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 20
+{{- end }}

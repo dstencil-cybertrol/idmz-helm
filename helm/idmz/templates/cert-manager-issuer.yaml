@@ -1,0 +1,23 @@
+{{ if .Values.certManager.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ printf "%s-letsencrypt" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  acme:
+    email: {{ .Values.certManager.email }}
+    server: {{ .Values.certManager.letsEncryptServer }}
+    privateKeySecretRef:
+      name: {{ printf "%s-letsencrypt-private-key" .Release.Name }}
+    solvers:
+      - selector: {}
+        dns01:
+          route53:
+            region: {{ .Values.certManager.route53Region }}
+            accessKeyID: {{ .Values.certManager.route53AccessKeyId }}
+            secretAccessKeySecretRef:
+              name: {{ printf "%s-cert-manager-route53-key" .Release.Name }}
+              key: secret_access_key
+            hostedZoneID: {{ .Values.certManager.route53HostedZoneId }}
+{{- end }}

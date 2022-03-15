@@ -1,0 +1,21 @@
+{{- if .Values.smtp.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-smtp-relay" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.smtp.sharedIp }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: global
+  {{- end }}
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.smtp.loadBalancerIpAddress }}
+  ports:
+    - name: smtp
+      protocol: TCP
+      port: {{ .Values.smtp.smtpPort }}
+      targetPort: 25
+  selector:
+    app: smtp-relay
+{{- end}}

@@ -1,0 +1,63 @@
+{{- if .Values.duo.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-duo-auth-proxy" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.duo.replicas }}
+  selector:
+    matchLabels:
+      app: duo-auth-proxy
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/duo-secret.yaml") . | sha256sum }}
+      labels:
+        app: duo-auth-proxy
+    spec:
+      restartPolicy: {{ .Values.duo.restartPolicy | quote}}
+      containers:
+        - name: {{ printf "%s-duo-auth-proxy" .Release.Name }}
+          image: alphabet5/duoauthproxy:{{ .Values.duo.version }}
+          imagePullPolicy: {{ .Values.duo.imagePullPolicy | quote}}
+          env:
+            - name: DUO_AD_HOST
+              value: {{ tpl .Values.duo.duoAdHost . | quote }}
+            - name: DUO_AD_USER
+              value: {{ tpl .Values.duo.duoAdUser . | quote }}
+            - name: DUO_AD_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-duo" .Release.Name }}
+                  key: duo_ad_password
+            - name: DUO_AD_SEARCH_DN
+              value: {{ tpl .Values.duo.duoAdSearchDn . | quote}}
+            - name: DUO_INTEGRATION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-duo" .Release.Name }}
+                  key: duo_integration_key
+            - name: DUO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-duo" .Release.Name }}
+                  key: duo_secret_key
+            - name: DUO_API_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-duo" .Release.Name }}
+                  key: duo_api_hostname
+            - name: DUO_RADIUS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-duo" .Release.Name }}
+                  key: duo_radius_secret
+            - name: DUO_FAILMODE
+              value: {{ .Values.duo.duoFailmode | quote }}
+            - name: DUO_PORT
+              value: "1812"
+          ports:
+            - containerPort: 1812
+              protocol: UDP
+{{- end }}

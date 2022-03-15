@@ -1,0 +1,17 @@
+{{- if and .Values.guacamole.enabled .Values.guacamole.users.enabled }}
+# Guacamole users configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-guacamole-users" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  {{- if .Values.guacamole.users.manualConnections }}
+  manual-connections.yaml: |
+{{ tpl .Values.guacamole.users.manualConnections . | indent 4 }}
+  {{- end }}
+  {{- if .Values.guacamole.users.autoConnections }}
+  auto-connections.yaml: |
+{{ tpl .Values.guacamole.users.autoConnections . | indent 4 }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,21 @@
+{{- if .Values.squid.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-squid-conf" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  squid.conf: |
+{{ tpl .Values.squid.cfg . | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-squid-whitelists" .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+data:
+{{- range $filename, $contents := $.Values.squid.whitelists }}
+  {{ $filename }}: |
+{{ $contents | indent 4 }}
+{{- end }}
+{{- end }}
