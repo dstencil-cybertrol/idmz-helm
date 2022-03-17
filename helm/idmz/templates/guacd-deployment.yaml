@@ -1,4 +1,4 @@
-{{- if .Values.guacamole.enabled }}
+{{- if and .Values.guacamole.enabled .Values.certManager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

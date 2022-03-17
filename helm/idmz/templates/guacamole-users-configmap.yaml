@@ -1,4 +1,4 @@
-{{- if and .Values.guacamole.enabled .Values.guacamole.users.enabled }}
+{{- if and .Values.guacamole.enabled .Values.guacamole.users.enabled .Values.certManager.enabled }}
 # Guacamole users configmap
 apiVersion: v1
 kind: ConfigMap

@@ -6,11 +6,11 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   {{- if .Values.duo.sharedIp }}
   annotations:
-    metallb.universe.tf/allow-shared-ip: global
+    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.duo.loadBalancerIpAddress . }}
   {{- end }}
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.duo.loadBalancerIpAddress }}
+  loadBalancerIP: {{ tpl .Values.duo.loadBalancerIpAddress . }}
   ports:
     - name: radius
       protocol: UDP

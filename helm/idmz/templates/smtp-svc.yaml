@@ -6,11 +6,11 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   {{- if .Values.smtp.sharedIp }}
   annotations:
-    metallb.universe.tf/allow-shared-ip: global
+    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.duo.loadBalancerIpAddress . }}
   {{- end }}
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.smtp.loadBalancerIpAddress }}
+  loadBalancerIP: {{ tpl .Values.smtp.loadBalancerIpAddress . }}
   ports:
     - name: smtp
       protocol: TCP

@@ -5,10 +5,10 @@ metadata:
   name: {{ printf "%s-dnsmasq-tcp" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
   annotations:
-    metallb.universe.tf/allow-shared-ip: global
+    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.dnsmasq.loadBalancerIpAddress . }}
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.dnsmasq.loadBalancerIpAddress }}
+  loadBalancerIP: {{ tpl .Values.dnsmasq.loadBalancerIpAddress . }}
   ports:
     - name: dnstcp
       protocol: TCP

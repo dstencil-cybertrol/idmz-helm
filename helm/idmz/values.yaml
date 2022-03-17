@@ -1,28 +1,67 @@
-global:
-  baseDomain: # testdomain.com
-  ldapBaseDn: # DC=testdomain,DC=com
+# Some values in this values.yaml file are able to be templated using other values. 
+# The default values under global for example.
+# loadBalancerIpAddress under services other than 'ingress' are able to be templated
+# By default (on services other than ingress) the loadBalancerIpAddress is set to
+# "{{ .Values.ingress.loadBalancerIpAddress }}"
+
+# global:
+#   # These global values are used in various places throughout the values.yaml file. 
+#   # They can be overriden in the respective app's config, or can be set here.
+#   # They are currently used in the following places:
+#   # - duo.duoAdHost: '{{ .Values.global.baseDomain }}'
+#   # - duo.duoAdSearchDn: 'CN=Users,{{ .Values.global.ldapBaseDn }}'
+#   # - guacamole.ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapDomain }}
+#   # - guacamole.properties: ldap-group-base-dn: {{ .Values.global.ldapBaseDn }}
+#   # - guacamole.properties: ldap-hostname: {{ .Values.global.ldapDomain }}
+#   # - guacamole.properties: ldap-search-bind-dn: CN={{ .Values.guacamole.ldapBindUser }},CN=Users,{{ .Values.global.ldapBaseDn }}
+#   # - guacamole.properties: ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
+#   # - guacamole.users.ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
+#   # - guacamole.users.autoConnections: domain: '{{ .Values.global.baseDomain }}'
+#   baseDomain: # testdomain.com
+#   ldapBaseDn: # DC=testdomain,DC=com
 
 ingress:
-  loadBalancerIpAddress:
+  # ingress is used to serve http traffic to various backends.
+  # It is used by guacamole, rdpgw (and authelia, used for the rdpgw.)
+  # If ingress is disabled, guacamole and rdpgw will also be disabled.
+  enabled: false
+  # By default all services will share the ingress loadBalancerIpAddress.
+  # This will limit src based acls for squid. 
+  # This is configured under each service and can be overridden to use a 
+  # dedicated ip address for each service.
+  loadBalancerIpAddress: 1.2.3.4
+  sharedIp: true
 
 certManager:
-  enabled: true
-  secrets:
-    route53SecretAccessKey:
-  email: 
-  letsEncryptServer:
-  route53Region:
-  route53HostedZoneId:
-  route53AccessKeyID:
+  # certManager (https://cert-manager.io/docs/) is required for tls certificates.
+  # TLS certificates are used by the ingress controller that serves traffic for guac. 
+  # TLS certs are also used by rdpgw if that is enabled.
+  # If certManager is disabled, guacamole and rdpgw will also be disabled.
+  enabled: false
+  # secrets:
+  #   route53SecretAccessKey:
+  # email: 
+  letsEncryptServer: https://acme-staging-v02.api.letsencrypt.org/directory
+  # route53Region:
+  # route53HostedZoneId:
+  # route53AccessKeyID:
 
 squid:
-  enabled: true
+  enabled: false
   version: latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress:
+  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  # If squid.sharedIp is set to true, you cannot use src based acls in the squid config.
+  # If the ip address is shared, the pod will only see communication from the IP address
+  # of the node that it is running on.
+  # If squid.sharedIp is set to false, externalTrafficPolicy will be set to Local.
+  # See https://metallb.universe.tf/usage/ for more details.
+  sharedIp: true
   squidPort: 3128
+  # squid.whitelists will be mapped to files under /whitelists in the squid container.
+  # These files can then be used within the squid.conf for building acls.
   whitelists:
     rockwell.txt: |
       .rockwellautomation.custhelp.com
@@ -86,36 +125,42 @@ squid:
     http_access allow CONNECT all
 
 dnsmasq:
-  enabled: true
+  enabled: false
   version: latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress:
-  args:
-    - #--server=192.168.1.159
-    - #--server=/domain.com/192.168.1.159
+  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  sharedIp: true
+  # dnsmasq.args are extra arguments to pass to the dnsmasq service.
+  # Example: --server=[/[<domain>]/[domain/]][<ipaddr>[#<port>]][@<interface>][@<source-ip>[#<port>]]
+  # See the dnsmasq man page for more details.
+  # The following example sets the default upstream server to 192.168.1.159
+  # and the upstream server for requests to domain.com to 192.168.1.160. 
+  # args:
+  #   - --server=192.168.1.159
+  #   - --server=/domain.com/192.168.1.160
 
 smtp:
-  enabled: true
-  secrets:
-    nextHopPassword:
+  enabled: false
+  # secrets:
+  #   nextHopPassword:
   version: latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
+  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
   sharedIp: true
-  loadBalancerIpAddress:
   smtpPort: 25
-  relayNetworks:
-  type: #gmail or smarthost
-  gmailAddress: #test@gmail.com
-  smartHostAddress:
-  smartHostPort:
-  smartHostUser:
+  relayNetworks: 0.0.0.0/0
+  # type: #gmail or smarthost
+  # gmailAddress: #test@gmail.com
+  # smartHostAddress:
+  # smartHostPort:
+  # smartHostUser:
 
 duo:
-  enabled: true
+  enabled: false
   secrets:
     duoAdPassword:
     duoApiHostname:
@@ -126,7 +171,7 @@ duo:
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress:
+  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
   sharedIp: true
   duoAdHost: '{{ .Values.global.baseDomain }}'
   duoAdUser: DuoUser
@@ -134,7 +179,7 @@ duo:
   duoFailmode: secure
 
 guacamole:
-  enabled: true
+  enabled: false
   secrets:
     guacAdminPassword:
     mysqlPassword:
@@ -145,7 +190,7 @@ guacamole:
   restartPolicy: Always
   imagePullPolicy: Always
   dnsName:
-  ldapBindUser:
+  ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapDomain }}
   debug: false
   properties: |
     enable-environment-properties: true
@@ -183,49 +228,55 @@ guacamole:
     restartPolicy: Always
     imagePullPolicy: Always
     debug: true
-    autoConnectionDns: false
-    autoConnectionDnsResolver:
-    guacAdminGroups:
+    # If guacamole.users.autoConnectionDns is set to true, 
+    # the dns name of the computer will be used. If it is 
+    # set to false, the ip address (resolved using 
+    # guacamole.users.autoConnectionDnsResolver) will be used.
+    autoConnectionDns: true 
+    # autoConnectionDnsResolver:
+    # guacamole.users.guacAdminGroups should be set to the group name that 
+    # contains users that you would like to have admin access to guacamole.
+    guacAdminGroups: "" 
     ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
     ldapComputerFilter: (objectCategory=Computer)
     ldapGroupNameFromConnNameRegex: (.*?)\..+
     ldapGroupNameMod: {regex}
     refreshSpeed: 300
     manualOnly: false
-    manualConnections: |
-      manual_connections:
-        defaults:
-          connection:
-            protocol: 'rdp'
-          parameters:
-            console-audio: 'true'
-            create-drive-path: 'true'
-            drive-name: 'shared'
-            drive-path: '/shared'
-            enable-drive: 'true'
-            enable-printing: 'true'
-            ignore-cert: 'true'
-            port: '3389'
-            printer-name: 'RemotePrinter'
-            security: 'nla'
-            username: '${GUAC_USERNAME}'
-            password: '${GUAC_PASSWORD}'
-            domain: '{{ .Values.global.baseDomain }}'
-        connections:
-         - defaults: true
-           connection:
-             connection_name: 'TEST-CONNECTION.domain.com - 192.168.1.160'
-           parameters:
-             hostname: '192.168.1.160'
-      #parameters section and specific paramters are only required if they are not the defaults.
-      # If manual connections are specified, permissions are required to be set for all manual connections.
-      # List all ldap groups under the connection_name for each manual connection. Any user in the ldap group
-      # will have permission to connect with the specific connection.
-      manual_permissions:
-        "Domain Users":
-          - 'TEST-CONNECTION.domain.com - 192.168.1.160'
-        ThisIsATestGroup:
-          - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    # manualConnections: |
+    #   manual_connections:
+    #     defaults:
+    #       connection:
+    #         protocol: 'rdp'
+    #       parameters:
+    #         console-audio: 'true'
+    #         create-drive-path: 'true'
+    #         drive-name: 'shared'
+    #         drive-path: '/shared'
+    #         enable-drive: 'true'
+    #         enable-printing: 'true'
+    #         ignore-cert: 'true'
+    #         port: '3389'
+    #         printer-name: 'RemotePrinter'
+    #         security: 'nla'
+    #         username: '${GUAC_USERNAME}'
+    #         password: '${GUAC_PASSWORD}'
+    #         domain: '{{ .Values.global.baseDomain }}'
+    #     connections:
+    #      - defaults: true
+    #        connection:
+    #          connection_name: 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    #        parameters:
+    #          hostname: '192.168.1.160'
+    #   #parameters section and specific paramters are only required if they are not the defaults.
+    #   # If manual connections are specified, permissions are required to be set for all manual connections.
+    #   # List all ldap groups under the connection_name for each manual connection. Any user in the ldap group
+    #   # will have permission to connect with the specific connection.
+    #   manual_permissions:
+    #     "Domain Users":
+    #       - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    #     ThisIsATestGroup:
+    #       - 'TEST-CONNECTION.domain.com - 192.168.1.160'
     autoConnections: |
       connection:
         protocol: 'rdp'
@@ -243,3 +294,63 @@ guacamole:
         username: '${GUAC_USERNAME}'
         password: '${GUAC_PASSWORD}'
         domain: '{{ .Values.global.baseDomain }}'
+
+elastic:
+  enabled: false
+  metricbeat:
+    enabled: false
+    version: 8.1.0
+    restartPolicy: Always
+    imagePullPolicy: Always
+    secrets:
+      # These secrets are converted to all uppercase environment variables.
+      # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
+      username: 
+      password:
+      cloudId:
+      cloudAuth:
+      # elasticHost:
+      # elasticUser:
+      # elasticPassword:
+    config: |
+      # This commented out example is useing a self-hosted elasticsearch cluster.
+      # By default, elastic cloud is used with cloudId and cloudAuth.
+      #output.elasticsearch:
+      #  hosts: ["${ELASTICHOST}"]
+      #  username: ${ELASTICUSER}
+      #  password: ${ELASTICPASSWORD}
+      #  ssl:
+      #    enabled: true
+      #    ca_trusted_fingerprint: "b9a10bbe64ee9826abeda6546fc988c8bf798b41957c33d05db736716513dc9c"
+      cloudId: ${CLOUDID}
+      cloudAuth: ${CLOUDAUTH}
+      metricbeat.modules:
+      - module: vsphere
+        enabled: true
+        metricsets: ["datastore", "host", "virtualmachine"]
+        period: 10s
+        hosts: ["https://ESXI01/sdk"]
+        username: ${USERNAME}
+        password: ${PASSWORD}
+        # If insecure is true, don't verify the server's certificate chain
+        insecure: true
+        # Get custom fields when using virtualmachine metric set. Default false.
+        # get_custom_fields: false
+
+
+
+    
+
+# rdpgw:
+#   enabled: false
+#   version: latest
+#   replicas: 1
+#   restartPolicy: Always
+#   imagePullPolicy: Always
+#   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+#   sharedIp: true
+#   # authenticationUrl:
+#   # hosts:
+#   #   dnsName: hostIp
+#   #   i.e.
+#   #   host1.rdpgw.demo.com: 192.168.1.2

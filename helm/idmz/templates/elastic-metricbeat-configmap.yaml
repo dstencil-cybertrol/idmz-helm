@@ -1,0 +1,10 @@
+{{- if and .Values.elastic.enabled .Values.elastic.metricbeat.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-metricbeat" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  metricbeat.yml: |
+{{ tpl .Values.elastic.metricbeat.config . | indent 4 }}
+{{- end }}

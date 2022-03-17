@@ -1,8 +1,13 @@
+{{- if .Values.ingress.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ printf "%s-ingress" .Release.Name }}
   namespace: ingress
+  {{- if .Values.ingress.sharedIp }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ .Values.ingress.loadBalancerIpAddress }} 
+  {{- end }}
 spec:
   selector:
     name: nginx-ingress-microk8s
@@ -17,3 +22,4 @@ spec:
       targetPort: 443
   type: LoadBalancer
   loadBalancerIP: {{ .Values.ingress.loadBalancerIpAddress }}
+{{- end }}

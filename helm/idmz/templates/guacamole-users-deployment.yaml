@@ -1,4 +1,4 @@
-{{- if and .Values.guacamole.enabled .Values.guacamole.users.enabled }}
+{{- if and .Values.guacamole.enabled .Values.guacamole.users.enabled .Values.certManager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
