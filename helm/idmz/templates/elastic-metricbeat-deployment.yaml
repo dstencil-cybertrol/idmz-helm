@@ -26,7 +26,7 @@ spec:
             - name: {{ $secretname | upper }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "$s-elastic-metricbeat" $.Release.Name }}
+                  name: {{ printf "%s-elastic-metricbeat" $.Release.Name }}
                   key: {{ $secretname }}
           {{- end }}
           volumeMounts:
