@@ -41,8 +41,10 @@ certManager:
   # secrets:
   #   route53SecretAccessKey:
   # email: 
-  letsEncryptServer: https://acme-staging-v02.api.letsencrypt.org/directory
-  # route53Region:
+  # ACME staging is used by default. To use for production, change the url to:
+  # https://acme-v02.api.letsencrypt.org/directory
+  letsEncryptServer: https://acme-staging-v02.api.letsencrypt.org/directory 
+  route53Region: us-east-1
   # route53HostedZoneId:
   # route53AccessKeyID:
 
@@ -302,16 +304,16 @@ elastic:
     version: 8.1.0
     restartPolicy: Always
     imagePullPolicy: Always
-    secrets:
-      # These secrets are converted to all uppercase environment variables.
-      # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
-      username: 
-      password:
-      cloudId:
-      cloudAuth:
-      # elasticHost:
-      # elasticUser:
-      # elasticPassword:
+    # secrets:
+    #   # These secrets are converted to all uppercase environment variables.
+    #   # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
+    #   username: 
+    #   password:
+    #   cloudId:
+    #   cloudAuth:
+    #   # elasticHost:
+    #   # elasticUser:
+    #   # elasticPassword:
     config: |
       # This commented out example is useing a self-hosted elasticsearch cluster.
       # By default, elastic cloud is used with cloudId and cloudAuth.
@@ -337,12 +339,19 @@ elastic:
         # Get custom fields when using virtualmachine metric set. Default false.
         # get_custom_fields: false
 
-
-
-    
-
 # rdpgw:
 #   enabled: false
+  # secrets:
+  #   autheliaJwtSecret: 
+  #   autheliaStorageEncryptionKey: 
+  #   autheliaBackendLdapPassword: 
+  #   autheliaIssuer: 
+  #   autheliaHmac: 
+  #   rdpwSessionKey:
+  #   rdpgwSessionEncryptionKey:
+  #   rdpgwOidcClientSecret:
+  #   rdpgwPaaTokenSigningKey:
+  #   rdpgwUserTokenEncryptionKey:
 #   version: latest
 #   replicas: 1
 #   restartPolicy: Always
