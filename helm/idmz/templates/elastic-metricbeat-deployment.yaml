@@ -13,7 +13,6 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/elastic-metricbeat-configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/elastic-metricbeat-secret.yaml") . | sha256sum }}
       labels:
         app: elastic-metricbeat
     spec:
