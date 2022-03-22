@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-metricbeat" .Release.Name }}
+  name: {{ printf "%s-elastic-metricbeat" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 data:
   metricbeat.yml: |
