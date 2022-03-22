@@ -19,7 +19,7 @@ spec:
       restartPolicy: {{ .Values.guacamole.sql.restartPolicy | quote }}
       initContainers:
         - name: {{ printf "%s-mysql-init" .Release.Name }}
-          image: guacamole/guacamole:{{ .Values.guacamole.version }}
+          image: {{ .Values.guacamole.image }}
           command:
             - '/bin/bash'
             - '-c'
