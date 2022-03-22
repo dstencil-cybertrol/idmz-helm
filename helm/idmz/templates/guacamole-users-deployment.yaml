@@ -20,7 +20,7 @@ spec:
       restartPolicy: {{ .Values.guacamole.users.restartPolicy | quote }}
       containers:
         - name: {{ printf "%s-guacamole-users" .Release.Name }}
-          image: alphabet5/guacamole-users:{{ .Values.guacamole.users.version }}
+          image: {{ .Values.guacamole.users.image }}
           imagePullPolicy: {{ .Values.guacamole.users.imagePullPolicy | quote }}
           env:
             - name: DEBUG

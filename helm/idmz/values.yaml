@@ -50,7 +50,7 @@ certManager:
 
 squid:
   enabled: false
-  version: latest
+  image: alphabet5/squid:latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
@@ -128,7 +128,7 @@ squid:
 
 dnsmasq:
   enabled: false
-  version: latest
+  image: alphabet5/dnsmasq:latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
@@ -147,7 +147,7 @@ smtp:
   enabled: false
   # secrets:
   #   nextHopPassword:
-  version: latest
+  image: namshi/smtp:latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
@@ -169,7 +169,7 @@ duo:
     duoIntegrationKey:
     duoRadiusSecret:
     duoSecretKey:
-  version: latest
+  image: alphabet5/duoauthproxy:latest
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
@@ -187,7 +187,7 @@ guacamole:
     mysqlPassword:
     mysqlRootPassword:
     ldapBindPassword:
-  version: 1.4.0
+  image: guacamole/guacamole:1.4.0
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
@@ -207,17 +207,16 @@ guacamole:
     ldap-user-search-filter: (objectCategory=*)
     ldap-username-attribute: samAccountName
   guacd:
-    version: latest
+    image: guacamole/guacd:1.4.0
     replicas: 1
     restartPolicy: Always
     imagePullPolicy: Always
   init:
-    version: latest
+    image: alphabet5/guacamole:latest
     imagePullPolicy: Always
   sql:
     enabled: true
-    image: mariadb
-    version: latest
+    image: mariadb:latest
     replicas: 1
     restartPolicy: Always
     imagePullPolicy: Always
@@ -225,7 +224,7 @@ guacamole:
     usersDatabase: guacdb
   users:
     enabled: true
-    version: latest
+    image: alphabet5/guacamole-users:latest
     replicas: 1
     restartPolicy: Always
     imagePullPolicy: Always

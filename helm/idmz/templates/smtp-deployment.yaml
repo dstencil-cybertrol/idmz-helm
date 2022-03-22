@@ -19,7 +19,7 @@ spec:
       restartPolicy: {{ .Values.smtp.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-smtp-relay" .Release.Name }}
-          image: namshi/smtp:{{ .Values.smtp.version }}
+          image: {{ .Values.smtp.image }}
           imagePullPolicy: {{ .Values.smtp.imagePullPolicy | quote}}
           env:
             {{- if eq .Values.smtp.type "gmail" }}

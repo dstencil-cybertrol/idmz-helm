@@ -17,7 +17,7 @@ spec:
       restartPolicy: {{ .Values.guacamole.guacd.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-guacd" .Release.Name }}
-          image: guacamole/guacd:{{ .Values.guacamole.guacd.version }}
+          image: {{ .Values.guacamole.guacd.image }}
           imagePullPolicy: {{ .Values.guacamole.guacd.imagePullPolicy | quote}}
           ports:
             - containerPort: 4822

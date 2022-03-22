@@ -19,7 +19,7 @@ spec:
       restartPolicy: {{ .Values.squid.restartPolicy | quote }}
       containers:
         - name: {{ printf "%s-squid" .Release.Name }}
-          image: alphabet5/squid:{{ .Values.squid.version }}
+          image: {{ .Values.squid.image }}
           imagePullPolicy: {{ .Values.squid.imagePullPolicy | quote }}
           ports:
             - containerPort: 3128

@@ -29,7 +29,7 @@ spec:
               mountPath: "/mysqlinit/"
       containers:
         - name: {{ printf "%s-mysql" .Release.Name }}
-          image: {{ .Values.guacamole.sql.image }}:{{ .Values.guacamole.sql.version }}
+          image: {{ .Values.guacamole.sql.image }}
           imagePullPolicy: {{ .Values.guacamole.sql.imagePullPolicy | quote }}
           env:
             - name: MYSQL_USER

@@ -19,7 +19,7 @@ spec:
       restartPolicy: {{ .Values.duo.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-duo-auth-proxy" .Release.Name }}
-          image: alphabet5/duoauthproxy:{{ .Values.duo.version }}
+          image: {{ .Values.duo.image }}
           imagePullPolicy: {{ .Values.duo.imagePullPolicy | quote}}
           env:
             - name: DUO_AD_HOST
