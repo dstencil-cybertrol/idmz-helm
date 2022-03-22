@@ -19,7 +19,7 @@ spec:
       restartPolicy: {{ .Values.elastic.metricbeat.restartPolicy  | quote }}
       containers:
         - name: {{ printf "%s-guacamole" .Release.Name }}
-          image: docker.elastic.co/beats/metricbeat:{{ .Values.guacamole.version }}
+          image: {{ .Values.elastic.metricbeat.image }}
           imagePullPolicy: {{ .Values.elastic.metricbeat.imagePullPolicy  | quote }}
           env:
           {{- range $secretname, $secret := .Values.elastic.metricbeat.secrets }}

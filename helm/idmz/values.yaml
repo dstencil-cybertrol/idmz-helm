@@ -301,7 +301,7 @@ elastic:
   enabled: false
   metricbeat:
     enabled: false
-    version: 8.1.0
+    image: docker.elastic.co/beats/metricbeat:8.4.0
     restartPolicy: Always
     imagePullPolicy: Always
     # secrets:
