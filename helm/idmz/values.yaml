@@ -4,21 +4,21 @@
 # By default (on services other than ingress) the loadBalancerIpAddress is set to
 # "{{ .Values.ingress.loadBalancerIpAddress }}"
 
-# global:
-#   # These global values are used in various places throughout the values.yaml file. 
-#   # They can be overriden in the respective app's config, or can be set here.
-#   # They are currently used in the following places:
-#   # - duo.duoAdHost: '{{ .Values.global.baseDomain }}'
-#   # - duo.duoAdSearchDn: 'CN=Users,{{ .Values.global.ldapBaseDn }}'
-#   # - guacamole.ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapDomain }}
-#   # - guacamole.properties: ldap-group-base-dn: {{ .Values.global.ldapBaseDn }}
-#   # - guacamole.properties: ldap-hostname: {{ .Values.global.ldapDomain }}
-#   # - guacamole.properties: ldap-search-bind-dn: CN={{ .Values.guacamole.ldapBindUser }},CN=Users,{{ .Values.global.ldapBaseDn }}
-#   # - guacamole.properties: ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
-#   # - guacamole.users.ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
-#   # - guacamole.users.autoConnections: domain: '{{ .Values.global.baseDomain }}'
-#   baseDomain: # testdomain.com
-#   ldapBaseDn: # DC=testdomain,DC=com
+global:
+  # These global values are used in various places throughout the values.yaml file. 
+  # They can be overriden in the respective app's config, or can be set here.
+  # They are currently used in the following places:
+  # - duo.duoAdHost: '{{ .Values.global.baseDomain }}'
+  # - duo.duoAdSearchDn: 'CN=Users,{{ .Values.global.ldapBaseDn }}'
+  # - guacamole.ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapDomain }}
+  # - guacamole.properties: ldap-group-base-dn: {{ .Values.global.ldapBaseDn }}
+  # - guacamole.properties: ldap-hostname: {{ .Values.global.ldapDomain }}
+  # - guacamole.properties: ldap-search-bind-dn: CN={{ .Values.guacamole.ldapBindUser }},CN=Users,{{ .Values.global.ldapBaseDn }}
+  # - guacamole.properties: ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
+  # - guacamole.users.ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
+  # - guacamole.users.autoConnections: domain: '{{ .Values.global.baseDomain }}'
+  baseDomain: "" # testdomain.com
+  ldapBaseDn: "" # DC=testdomain,DC=com
 
 ingress:
   # ingress is used to serve http traffic to various backends.
@@ -38,15 +38,15 @@ certManager:
   # TLS certs are also used by rdpgw if that is enabled.
   # If certManager is disabled, guacamole and rdpgw will also be disabled.
   enabled: false
-  # secrets:
-  #   route53SecretAccessKey:
-  # email: 
+  secrets:
+    route53SecretAccessKey: ""
+  email: ""
   # ACME staging is used by default. To use for production, change the url to:
   # https://acme-v02.api.letsencrypt.org/directory
   letsEncryptServer: https://acme-staging-v02.api.letsencrypt.org/directory 
   route53Region: us-east-1
-  # route53HostedZoneId:
-  # route53AccessKeyID:
+  route53HostedZoneId: ""
+  route53AccessKeyID: ""
 
 squid:
   enabled: false
@@ -133,20 +133,22 @@ dnsmasq:
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  # dnsmasq.sharedIp needs to be set to true for both TCP and UDP dns queries to work.
   sharedIp: true
   # dnsmasq.args are extra arguments to pass to the dnsmasq service.
   # Example: --server=[/[<domain>]/[domain/]][<ipaddr>[#<port>]][@<interface>][@<source-ip>[#<port>]]
   # See the dnsmasq man page for more details.
   # The following example sets the default upstream server to 192.168.1.159
   # and the upstream server for requests to domain.com to 192.168.1.160. 
-  # args:
-  #   - --server=192.168.1.159
-  #   - --server=/domain.com/192.168.1.160
+  args: []
+    # Example:
+    # - --server=192.168.1.159
+    # - --server=/domain.com/192.168.1.160
 
 smtp:
   enabled: false
-  # secrets:
-  #   nextHopPassword:
+  secrets:
+    nextHopPassword: ""
   image: namshi/smtp:latest
   replicas: 1
   restartPolicy: Always
@@ -155,20 +157,20 @@ smtp:
   sharedIp: true
   smtpPort: 25
   relayNetworks: 0.0.0.0/0
-  # type: #gmail or smarthost
-  # gmailAddress: #test@gmail.com
-  # smartHostAddress:
-  # smartHostPort:
-  # smartHostUser:
+  type: gmail # gmail or smarthost
+  gmailAddress: "" #test@gmail.com
+  smartHostAddress: ""
+  smartHostPort: ""
+  smartHostUser: ""
 
 duo:
   enabled: false
   secrets:
-    duoAdPassword:
-    duoApiHostname:
-    duoIntegrationKey:
-    duoRadiusSecret:
-    duoSecretKey:
+    duoAdPassword: ""
+    duoApiHostname: ""
+    duoIntegrationKey: ""
+    duoRadiusSecret: ""
+    duoSecretKey: ""
   image: alphabet5/duoauthproxy:latest
   replicas: 1
   restartPolicy: Always
@@ -234,7 +236,7 @@ guacamole:
     # set to false, the ip address (resolved using 
     # guacamole.users.autoConnectionDnsResolver) will be used.
     autoConnectionDns: true 
-    # autoConnectionDnsResolver:
+    autoConnectionDnsResolver: ""
     # guacamole.users.guacAdminGroups should be set to the group name that 
     # contains users that you would like to have admin access to guacamole.
     guacAdminGroups: "" 
