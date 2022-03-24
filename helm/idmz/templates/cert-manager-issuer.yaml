@@ -19,5 +19,7 @@ spec:
             secretAccessKeySecretRef:
               name: {{ printf "%s-cert-manager-route53-key" .Release.Name }}
               key: secret_access_key
+            {{- if ne .Values.certManager.route53HostedZoneId "" }}
             hostedZoneID: {{ .Values.certManager.route53HostedZoneId }}
+            {{- end }}
 {{- end }}
