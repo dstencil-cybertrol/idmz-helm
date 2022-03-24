@@ -325,8 +325,9 @@ elastic:
       #  ssl:
       #    enabled: true
       #    ca_trusted_fingerprint: "b9a10bbe64ee9826abeda6546fc988c8bf798b41957c33d05db736716513dc9c"
-      cloudId: ${CLOUDID}
-      cloudAuth: ${CLOUDAUTH}
+      cloud:
+        id: ${CLOUDID}
+        auth: ${CLOUDAUTH}
       metricbeat.modules:
       - module: vsphere
         enabled: true
