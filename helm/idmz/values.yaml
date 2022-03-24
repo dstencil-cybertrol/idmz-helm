@@ -377,16 +377,6 @@ elastic:
         ios:
           var.syslog_host: 0.0.0.0
           var.syslog_port: 9002
-        enabled: true
-        metricsets: ["datastore", "host", "virtualmachine"]
-        period: 10s
-        hosts: ["https://ESXI01/sdk"]
-        username: ${USERNAME}
-        password: ${PASSWORD}
-        # If insecure is true, don't verify the server's certificate chain
-        insecure: true
-        # Get custom fields when using virtualmachine metric set. Default false.
-        # get_custom_fields: false
     
 # rdpgw:
 #   enabled: false
