@@ -27,8 +27,6 @@ This chart bootstraps an IDMZ deployment on a Kubernetes cluster using the Helm 
 
 - cert-manager/cert-manager
 
-- stakater/Reloader
-
 ## Installing the Chart
 
 ```bash
@@ -40,11 +38,3 @@ helm install my-release cybertrol-engineering-idmz/idmz
 ```bash
 helm delete my-release
 ```
-
-## Parameters
-
-### Global parameters
-
-| Name          | Description                                            | Value     |
-|---------------|--------------------------------------------------------|-----------|
-|global.
