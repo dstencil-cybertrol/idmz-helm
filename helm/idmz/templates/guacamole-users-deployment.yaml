@@ -61,7 +61,7 @@ spec:
               value: {{ .Values.guacamole.users.manualOnly | quote }}
           volumeMounts:
           {{- if .Values.guacamole.users.manualConnections }}
-            - name: guacamole-users-volume
+            - name: {{ printf "%s-guacamole-users-volume" .Release.Name }}
               mountPath: "/configs/manual-connections.yaml"
               subPath: "manual-connections.yaml"
           {{- end }}
