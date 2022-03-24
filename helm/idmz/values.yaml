@@ -305,7 +305,7 @@ elastic:
     image: docker.elastic.co/beats/metricbeat:8.1.1
     restartPolicy: Always
     imagePullPolicy: Always
-    # secrets:
+    secrets: {}
     #   # These secrets are converted to all uppercase environment variables.
     #   # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
     #   username: 
@@ -340,7 +340,54 @@ elastic:
         insecure: true
         # Get custom fields when using virtualmachine metric set. Default false.
         # get_custom_fields: false
-
+  filebeat:
+    enabled: false
+    image: docker.elastic.co/beats/filebeat:8.1.1
+    restartPolicy: Always
+    imagePullPolicy: Always
+    loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+    udpPorts:
+      - 9002
+    tcpPorts: []
+    secrets: {}
+    #   # These secrets are converted to all uppercase environment variables.
+    #   # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
+    #   username: 
+    #   password:
+    #   cloudId:
+    #   cloudAuth:
+    #   # elasticHost:
+    #   # elasticUser:
+    #   # elasticPassword:
+    config: |
+      # This commented out example is useing a self-hosted elasticsearch cluster.
+      # By default, elastic cloud is used with cloudId and cloudAuth.
+      #output.elasticsearch:
+      #  hosts: ["${ELASTICHOST}"]
+      #  username: ${ELASTICUSER}
+      #  password: ${ELASTICPASSWORD}
+      #  ssl:
+      #    enabled: true
+      #    ca_trusted_fingerprint: "b9a10bbe64ee9826abeda6546fc988c8bf798b41957c33d05db736716513dc9c"
+      cloud:
+        id: ${CLOUDID}
+        auth: ${CLOUDAUTH}
+      filebeat.modules:
+      - module: cisco
+        ios:
+          var.syslog_host: 0.0.0.0
+          var.syslog_port: 9002
+        enabled: true
+        metricsets: ["datastore", "host", "virtualmachine"]
+        period: 10s
+        hosts: ["https://ESXI01/sdk"]
+        username: ${USERNAME}
+        password: ${PASSWORD}
+        # If insecure is true, don't verify the server's certificate chain
+        insecure: true
+        # Get custom fields when using virtualmachine metric set. Default false.
+        # get_custom_fields: false
+    
 # rdpgw:
 #   enabled: false
   # secrets:
