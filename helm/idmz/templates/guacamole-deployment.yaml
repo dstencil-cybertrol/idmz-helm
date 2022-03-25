@@ -57,6 +57,8 @@ spec:
               value: {{ printf "%s-guacd" .Release.Name }}
             - name: GUACAMOLE_HOME
               value: /etc/guacamole
+            - name: LDAP_SEARCH_BIND_DN
+              value: {{ tpl .Values.guacamole.ldapBindUser . | quote}}
             - name: LDAP_SEARCH_BIND_PASSWORD
               valueFrom:
                 secretKeyRef:

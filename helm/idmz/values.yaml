@@ -204,7 +204,6 @@ guacamole:
     ldap-group-name-attribute: cn
     ldap-hostname: {{ .Values.global.ldapBaseDn }}
     ldap-port: 389
-    ldap-search-bind-dn: {{ .Values.guacamole.ldapBindUser }}
     ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
     ldap-user-search-filter: (objectCategory=*)
     ldap-username-attribute: samAccountName

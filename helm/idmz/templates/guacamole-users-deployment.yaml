@@ -50,6 +50,8 @@ spec:
               value: {{ .Values.guacamole.users.ldapGroupNameFromConnNameRegex | quote }}
             - name: LDAP_GROUP_NAME_MOD
               value: {{ .Values.guacamole.users.ldapGroupNameMod | quote }}
+            - name: LDAP_SEARCH_BIND_DN
+              value: {{ tpl .Values.guacamole.ldapBindUser . | quote}}
             - name: LDAP_SEARCH_BIND_PASSWORD
               valueFrom:
                 secretKeyRef:
