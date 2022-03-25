@@ -57,6 +57,8 @@ spec:
               value: {{ .Values.duo.duoFailmode | quote }}
             - name: DUO_PORT
               value: "1812"
+            - name: DEBUG
+              value: {{ .Values.duo.debug | quote }}
           ports:
             - containerPort: 1812
               protocol: UDP

@@ -173,6 +173,7 @@ smtp:
 
 duo:
   enabled: false
+  debug: false
   secrets:
     duoAdPassword: ""
     duoApiHostname: ""
