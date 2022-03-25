@@ -202,7 +202,7 @@ guacamole:
     ldap-group-base-dn: {{ .Values.global.ldapBaseDn }}
     ldap-group-search-filter: (objectCategory=group)
     ldap-group-name-attribute: cn
-    ldap-hostname: {{ .Values.global.ldapBaseDn }}
+    ldap-hostname: {{ .Values.global.baseDomain }}
     ldap-port: 389
     ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
     ldap-user-search-filter: (objectCategory=*)
