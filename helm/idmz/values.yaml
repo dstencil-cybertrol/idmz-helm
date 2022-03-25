@@ -100,6 +100,12 @@ squid:
       go.microsoft.com
       dl.delivery.mp.microsoft.com
   cfg: |
+    #Setup logging
+    logfile_rotate 0
+    cache_log stdio:/dev/stdout
+    access_log stdio:/dev/stdout
+    cache_store_log stdio:/var/dev/stdout
+
     #Set allowed ports
     acl SSL_ports port 443
     acl Safe_ports port 80          # http
