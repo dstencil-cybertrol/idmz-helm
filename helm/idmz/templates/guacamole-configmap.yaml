@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 data:
   guacamole.properties: |
-{{ tpl .Values.guacamole.properties . | indent 4 }}
+{{ tpl (tpl .Values.guacamole.properties .) . | indent 4 }}
 {{- if .Values.guacamole.debug }}
   logback.xml: |-
     <configuration>
