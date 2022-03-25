@@ -105,6 +105,7 @@ squid:
     cache_log stdio:/dev/stdout
     access_log stdio:/dev/stdout
     cache_store_log stdio:/dev/stdout
+    acl hasRequest has request
     access_log none !hasRequest
 
     #Set allowed ports
