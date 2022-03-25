@@ -194,7 +194,7 @@ guacamole:
   restartPolicy: Always
   imagePullPolicy: Always
   dnsName:
-  ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapDomain }}
+  ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapBaseDn }}
   debug: false
   properties: |
     enable-environment-properties: true
@@ -202,9 +202,9 @@ guacamole:
     ldap-group-base-dn: {{ .Values.global.ldapBaseDn }}
     ldap-group-search-filter: (objectCategory=group)
     ldap-group-name-attribute: cn
-    ldap-hostname: {{ .Values.global.ldapDomain }}
+    ldap-hostname: {{ .Values.global.ldapBaseDn }}
     ldap-port: 389
-    ldap-search-bind-dn: CN={{ .Values.guacamole.ldapBindUser }},CN=Users,{{ .Values.global.ldapBaseDn }}
+    ldap-search-bind-dn: {{ .Values.guacamole.ldapBindUser }}
     ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
     ldap-user-search-filter: (objectCategory=*)
     ldap-username-attribute: samAccountName
