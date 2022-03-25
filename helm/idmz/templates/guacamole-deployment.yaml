@@ -12,8 +12,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/guacamole-users-configmap.yaml") . | sha256sum }}
-        checksum/properties: {{ include (print $.Template.BasePath "/guacamole-configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/guacamole-configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/guacamole-secret.yaml") . | sha256sum }}
       labels:
         app: guacamole
