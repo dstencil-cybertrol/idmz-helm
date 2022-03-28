@@ -250,8 +250,8 @@ guacamole:
     guacAdminGroups: "" 
     ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
     ldapComputerFilter: (objectCategory=Computer)
-    ldapGroupNameFromConnNameRegex: "(.*?)\..+"
-    ldapGroupNameMod: "{regex}-RDS"
+    ldapGroupNameFromConnNameRegex: '(.*?)\..+'
+    ldapGroupNameMod: '{regex}-RDS'
     refreshSpeed: 300
     manualOnly: false
     # manualConnections: |
