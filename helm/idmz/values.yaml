@@ -46,7 +46,7 @@ certManager:
   letsEncryptServer: https://acme-staging-v02.api.letsencrypt.org/directory 
   route53Region: us-east-1
   route53HostedZoneId: ""
-  route53AccessKeyID: ""
+  route53AccessKeyId: ""
 
 squid:
   enabled: false
