@@ -202,7 +202,7 @@ guacamole:
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
-  dnsName:
+  dnsName: "" # Example: guacamole.domain.com
   ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapBaseDn }}
   debug: false
   properties: |
@@ -251,7 +251,7 @@ guacamole:
     ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
     ldapComputerFilter: (objectCategory=Computer)
     ldapGroupNameFromConnNameRegex: (.*?)\..+
-    ldapGroupNameMod: {regex}
+    ldapGroupNameMod: {regex}-RDS
     refreshSpeed: 300
     manualOnly: false
     # manualConnections: |
