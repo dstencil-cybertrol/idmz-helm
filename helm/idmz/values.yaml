@@ -102,11 +102,11 @@ squid:
   cfg: |
     #Setup logging
     logfile_rotate 0
+    acl hasRequest has request
+    access_log none !hasRequest
     cache_log stdio:/dev/stdout
     access_log stdio:/dev/stdout
     cache_store_log stdio:/dev/stdout
-    acl hasRequest has request
-    access_log none !hasRequest
 
     #Set allowed ports
     acl SSL_ports port 443
