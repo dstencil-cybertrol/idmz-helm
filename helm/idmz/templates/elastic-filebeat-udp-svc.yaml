@@ -4,11 +4,16 @@ kind: Service
 metadata:
   name: {{ printf "%s-elastic-filebeat-udp" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.elastic.filebeat.sharedIp }}
   annotations:
-    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.elastic.filebeat.loadBalancerIpAddress . }}
+    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.elastic.filebeat.loadBalancerIpAddressUDP . }}
+  {{- end }}
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{ tpl .Values.elastic.filebeat.loadBalancerIpAddress . }}
+  loadBalancerIP: {{ tpl .Values.elastic.filebeat.loadBalancerIpAddressUDP . }}
+  {{- if not .Values.elastic.filebeat.sharedIp }}
+  externalTrafficPolicy: Local
+  {{- end }}
   ports:
     {{- range $port := .Values.elastic.filebeat.udpPorts }}
     - protocol: UDP

@@ -353,7 +353,17 @@ elastic:
     image: docker.elastic.co/beats/filebeat:8.1.1
     restartPolicy: Always
     imagePullPolicy: Always
-    loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+    # If elastic.filebeat.sharedIp is set to true, you cannot see the src address in the logs.
+    # If the ip address is shared, the pod will only see communication from the IP address
+    # of the node that it is running on.
+    # If elastic.filebeat.sharedIp is set to false, externalTrafficPolicy will be set to Local.
+    # See https://metallb.universe.tf/usage/ for more details.
+    # If elastic.filebeat.sharedIp is set to false, you will need to set a unique IP address for
+    # elastic.filebeat.loadBalancerIpAddress.
+    # If you are listening on both TCP and UDP, you will require different IP addresses for each.
+    sharedIp: true
+    loadBalancerIpAddressUDP: "{{ .Values.ingress.loadBalancerIpAddress }}"
+    loadBalancerIpAddressTCP: "{{ .Values.ingress.loadBalancerIpAddress }}"
     udpPorts:
       - 9002
     tcpPorts: []
