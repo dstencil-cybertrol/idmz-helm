@@ -17,8 +17,8 @@ spec:
   ports:
     {{- range $port := .Values.elastic.filebeat.udpPorts }}
     - protocol: UDP
-      port: {{ $port }}
-      targetPort: {{ $port }}
+      port: {{ int $port }}
+      targetPort: {{ int $port }}
       name: {{ printf "udp-%s" $port }}
     {{- end }}
   selector:

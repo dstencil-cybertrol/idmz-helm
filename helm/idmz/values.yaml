@@ -365,8 +365,8 @@ elastic:
     loadBalancerIpAddressUDP: "{{ .Values.ingress.loadBalancerIpAddress }}"
     loadBalancerIpAddressTCP: "{{ .Values.ingress.loadBalancerIpAddress }}"
     udpPorts:
-      - 9002
-      - 514
+      - "9002"
+      - "514"
     tcpPorts: []
     secrets: {}
     #   # These secrets are converted to all uppercase environment variables.
