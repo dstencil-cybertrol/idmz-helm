@@ -19,6 +19,7 @@ spec:
     - protocol: UDP
       port: {{ $port }}
       targetPort: {{ $port }}
+      name: {{ printf "udp-%s" $port }}
     {{- end }}
   selector:
     app: elastic-filebeat

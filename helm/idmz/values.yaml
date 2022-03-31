@@ -366,6 +366,7 @@ elastic:
     loadBalancerIpAddressTCP: "{{ .Values.ingress.loadBalancerIpAddress }}"
     udpPorts:
       - 9002
+      - 514
     tcpPorts: []
     secrets: {}
     #   # These secrets are converted to all uppercase environment variables.
@@ -395,6 +396,11 @@ elastic:
         ios:
           var.syslog_host: 0.0.0.0
           var.syslog_port: 9002
+      filebeat.inputs:
+      - type: syslog
+        format: auto
+        protocol.udp:
+          host: "0.0.0.0:514"
     
 # rdpgw:
 #   enabled: false

@@ -19,6 +19,7 @@ spec:
     - protocol: TCP
       port: {{ $port }}
       targetPort: {{ $port }}
+      name: {{ printf "tcp-%s" $port }}
     {{- end }}
   selector:
     app: elastic-filebeat
