@@ -1,0 +1,32 @@
+{{- if and .Values.rwp.enabled .Values.certManager.enabled .Values.ingress.enabled }}
+{{- range .Values.rwp.rules }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-rwp-%s" $.Release.Name ( .frontend | replace "." "-" ) }}
+  namespace: {{ $.Release.Namespace | quote }}
+  annotations:
+{{- if (.overrideAnnotations) }}
+{{ tpl .overrideAnnotations $ | indent 4 }}
+{{- else }}
+{{ tpl $.Values.rwp.defaultAnnotations $ | indent 4 }}
+{{- end }}
+spec:
+  rules:
+    - host: {{ .frontend }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "%s-rwp-%s" $.Release.Name ( .frontend | replace "." "-" ) }}
+                port:
+                  number: {{ .backend.port }}
+  tls:
+    - hosts:
+      - {{ .frontend }}
+      secretName: {{ printf "%s-rwp-%s-tls" $.Release.Name ( .frontend | replace "." "-" ) }}
+{{- end }}
+{{- end }}

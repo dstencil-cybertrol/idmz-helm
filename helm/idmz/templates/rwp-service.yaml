@@ -1,0 +1,26 @@
+{{- if and .Values.rwp.enabled .Values.certManager.enabled .Values.ingress.enabled }}
+{{- range .Values.rwp.rules }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rwp-%s" $.Release.Name ( .frontend | replace "." "-" ) }}
+  namespace: {{ $.Release.Namespace | quote }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ .backend.port }}
+      targetPort: {{ .backend.port }}
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: {{ printf "%s-rwp-%s" $.Release.Name ( .frontend | replace "." "-" ) }}
+  namespace: {{ $.Release.Namespace | quote }}
+subsets:
+  - addresses:
+      - ip: {{ .backend.host }}
+    ports:
+      - port: {{ .backend.port }}
+{{- end }}
+{{- end }}

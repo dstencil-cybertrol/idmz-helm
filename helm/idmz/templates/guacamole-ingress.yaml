@@ -8,21 +8,21 @@ metadata:
     kubernetes.io/ingress.class: "public"
     nginx.ingress.kubernetes.io/app-root: "/guacamole/"
     nginx.ingress.kubernetes.io/proxy-body-size: 2048m
-
+    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
 spec:
   rules:
-  - host: {{ .Values.guacamole.dnsName }}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ printf "%s-guacamole" .Release.Name }}
-            port:
-              number: 8080
+    - host: {{ .Values.guacamole.dnsName }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "%s-guacamole" .Release.Name }}
+                port:
+                  number: 8080
   tls:
-  - hosts:
-    - {{ .Values.guacamole.dnsName }}
-    secretName: {{ printf "%s-guacamole-tls" .Release.Name }}
+    - hosts:
+      - {{ .Values.guacamole.dnsName }}
+      secretName: {{ printf "%s-guacamole-tls" .Release.Name }}
 {{- end }}

@@ -32,6 +32,43 @@ ingress:
   loadBalancerIpAddress: 1.2.3.4
   sharedIp: true
 
+rwp:
+  enabled: false
+  defaultAnnotations: |
+    kubernetes.io/ingress.class: public
+    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+  rules:
+    - frontend: idmzk8s.merit.cybertrol.app
+      backend:
+        host: 10.5.54.23
+        port: 16443
+      overrideAnnotations: |
+        kubernetes.io/ingress.class: public
+        cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+        nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
+    - frontend: prodk8s.merit.cybertrol.app
+      backend:
+        host: 10.5.99.244
+        port: 16443
+      overrideAnnotations: |
+        kubernetes.io/ingress.class: public
+        cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+        nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
+
+    # - domain: example.domain.com
+    #   backend:
+    #     host: 1.2.3.4
+    #     port: 80
+    #   annotations:
+    #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    #     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+    #     nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
+  
+
 certManager:
   # certManager (https://cert-manager.io/docs/) is required for tls certificates.
   # TLS certificates are used by the ingress controller that serves traffic for guac. 
@@ -99,6 +136,17 @@ squid:
       ntservicepack.microsoft.com
       go.microsoft.com
       dl.delivery.mp.microsoft.com
+    elastic.txt: |
+      .elastic-cloud.com
+      artifacts.elastic.co
+    vmware.txt: |
+      vapp-updates.vmware.com
+      hostupdate.vmware.com
+      vcsa.vmware.com
+      www.vmware.com
+    ubuntu.txt: |
+      archive.ubuntu.com
+      api.snapcraft.io
   cfg: |
     #Setup logging
     logfile_rotate 0
@@ -305,112 +353,6 @@ guacamole:
         username: '${GUAC_USERNAME}'
         password: '${GUAC_PASSWORD}'
         domain: '{{ .Values.global.baseDomain }}'
-
-elastic:
-  enabled: false
-  metricbeat:
-    enabled: false
-    image: docker.elastic.co/beats/metricbeat:8.1.1
-    restartPolicy: Always
-    imagePullPolicy: Always
-    secrets: {}
-    #   # These secrets are converted to all uppercase environment variables.
-    #   # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
-    #   username: 
-    #   password:
-    #   cloudId:
-    #   cloudAuth:
-    #   # elasticHost:
-    #   # elasticUser:
-    #   # elasticPassword:
-    config: |
-      # This commented out example is useing a self-hosted elasticsearch cluster.
-      # By default, elastic cloud is used with cloudId and cloudAuth.
-      #output.elasticsearch:
-      #  hosts: ["${ELASTICHOST}"]
-      #  username: ${ELASTICUSER}
-      #  password: ${ELASTICPASSWORD}
-      #  ssl:
-      #    enabled: true
-      #    ca_trusted_fingerprint: "b9a10bbe64ee9826abeda6546fc988c8bf798b41957c33d05db736716513dc9c"
-      cloud:
-        id: ${CLOUDID}
-        auth: ${CLOUDAUTH}
-      metricbeat.modules:
-      - module: vsphere
-        enabled: true
-        metricsets: ["datastore", "host", "virtualmachine"]
-        period: 10s
-        hosts: ["https://ESXI01/sdk"]
-        username: ${USERNAME}
-        password: ${PASSWORD}
-        # If insecure is true, don't verify the server's certificate chain
-        insecure: true
-        # Get custom fields when using virtualmachine metric set. Default false.
-        # get_custom_fields: false
-  filebeat:
-    enabled: false
-    image: docker.elastic.co/beats/filebeat:8.1.1
-    restartPolicy: Always
-    imagePullPolicy: Always
-    # If elastic.filebeat.sharedIp is set to true, you cannot see the src address in the logs.
-    # If the ip address is shared, the pod will only see communication from the IP address
-    # of the node that it is running on.
-    # If elastic.filebeat.sharedIp is set to false, externalTrafficPolicy will be set to Local.
-    # See https://metallb.universe.tf/usage/ for more details.
-    # If elastic.filebeat.sharedIp is set to false, you will need to set a unique IP address for
-    # elastic.filebeat.loadBalancerIpAddress.
-    # If you are listening on both TCP and UDP, you will require different IP addresses for each.
-    sharedIp: true
-    loadBalancerIpAddressUDP: "{{ .Values.ingress.loadBalancerIpAddress }}"
-    loadBalancerIpAddressTCP: "{{ .Values.ingress.loadBalancerIpAddress }}"
-    udpPorts:
-      - "9002"
-      - "9003"
-    tcpPorts: []
-    secrets: {}
-    #   # These secrets are converted to all uppercase environment variables.
-    #   # Secret 'secretName' can be used within the metricbeat config as ${SECRETNAME}
-    #   username: 
-    #   password:
-    #   cloudId:
-    #   cloudAuth:
-    #   # elasticHost:
-    #   # elasticUser:
-    #   # elasticPassword:
-    config: |
-      # This commented out example is useing a self-hosted elasticsearch cluster.
-      # By default, elastic cloud is used with cloudId and cloudAuth.
-      #output.elasticsearch:
-      #  hosts: ["${ELASTICHOST}"]
-      #  username: ${ELASTICUSER}
-      #  password: ${ELASTICPASSWORD}
-      #  ssl:
-      #    enabled: true
-      #    ca_trusted_fingerprint: "b9a10bbe64ee9826abeda6546fc988c8bf798b41957c33d05db736716513dc9c"
-      cloud:
-        id: ${CLOUDID}
-        auth: ${CLOUDAUTH}
-      filebeat.modules:
-      - module: cisco
-        ios:
-          var.syslog_host: 0.0.0.0
-          var.syslog_port: 9002
-      filebeat.inputs:
-      - type: syslog
-        format: auto
-        protocol.udp:
-          host: "0.0.0.0:9003"
-        processors:
-          - drop_event:
-              when:
-                or:
-                  - equals:
-                      syslog.severity_label: Debug
-                  - equals:
-                      syslog.severity_label: Informational
-                  - equals:
-                      syslog.severity_label: Notice
     
 # rdpgw:
 #   enabled: false
