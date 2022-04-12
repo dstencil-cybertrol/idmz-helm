@@ -37,37 +37,28 @@ rwp:
   defaultAnnotations: |
     kubernetes.io/ingress.class: public
     cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
-  rules:
-    - frontend: idmzk8s.merit.cybertrol.app
-      backend:
-        host: 10.5.54.23
-        port: 16443
-      overrideAnnotations: |
-        kubernetes.io/ingress.class: public
-        cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
-        nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
-    - frontend: prodk8s.merit.cybertrol.app
-      backend:
-        host: 10.5.99.244
-        port: 16443
-      overrideAnnotations: |
-        kubernetes.io/ingress.class: public
-        cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
-        nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
-
-    # - domain: example.domain.com
+  rules: []
+    ## Example Configuration:
+    # - frontend: idmzk8s.demo.com
     #   backend:
-    #     host: 1.2.3.4
-    #     port: 80
-    #   annotations:
+    #     host: 1.2.3.5
+    #     port: 16443
+    #   overrideAnnotations: |
+    #     kubernetes.io/ingress.class: public
+    #     cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
     #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     #     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
     #     nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
-  
+    # - frontend: prodk8s.demo.com
+    #   backend:
+    #     host: 1.2.3.4
+    #     port: 16443
+    #   overrideAnnotations: |
+    #     kubernetes.io/ingress.class: public
+    #     cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+    #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    #     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+    #     nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
 
 certManager:
   # certManager (https://cert-manager.io/docs/) is required for tls certificates.
