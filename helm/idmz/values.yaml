@@ -385,7 +385,7 @@ rdpgw:
     # - host1.demo.com:3389
     # - 1.2.3.4:3389
   dnsName: "rdpgw.{{ .Values.global.publicBaseDomain }}" # rdpgw.domain.com
-  configTemplate: |
+  config: |
     Server:
       # CertFile: /certs/tls.crt # Not used. TLS is configured with ingress.
       # KeyFile: /certs/tls.key # Not used. TLS is configured with ingress.

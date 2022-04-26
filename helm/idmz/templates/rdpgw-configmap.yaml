@@ -6,5 +6,5 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 data:
   rdpgw.yaml: |
-{{ tpl .Values.rdpgw.rdpgw.configTemplate . | indent 4 }}
+{{ tpl .Values.rdpgw.config . | indent 4 }}
 {{- end }}
