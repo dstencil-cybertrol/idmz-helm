@@ -26,6 +26,12 @@ spec:
             - 'sh'
             - '-c'
             - 'sed -e "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" -e "s:\$RDPGW_OPEN_ID_DNS_NAME:${RDPGW_OPEN_ID_DNS_NAME}:g" /configuration.yml > /config/configuration.yml'
+          volumeMounts:
+            - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
+              mountPath: /configuration.yml
+              subPath: configuration.yml
+            - name: {{ printf "%s-rdpgw-authelia-emptydir-volume" .Release.Name }}
+              mountPath: "/config/"
       containers:
         - name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
           image: {{ .Values.rdpgw.authelia.image }}
@@ -52,9 +58,6 @@ spec:
             - name: authelia
               containerPort: 9091
           volumeMounts:
-            - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
-              mountPath: /configuration.yml
-              subPath: configuration.yml
             - name: {{ printf "%s-rdpgw-authelia-secrets-volume" .Release.Name }}
               mountPath: /app/secrets
               readOnly: true

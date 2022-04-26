@@ -375,7 +375,7 @@ rdpgw:
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
-  secrets:
+  secrets: # use 32 different sets of random characters for these.
     serverSessionKey:
     serverSessionEncryptionKey:
     openIdClientSecret:
