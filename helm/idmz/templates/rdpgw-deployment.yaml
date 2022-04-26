@@ -17,7 +17,7 @@ spec:
       labels:
         app: rdpgw
     spec:
-      restartPolicy: {{ .Values.rdpgwp.restartPolicy  | quote }}
+      restartPolicy: {{ .Values.rdpgw.restartPolicy  | quote }}
       containers:
         - name: {{ printf "%s-rdpgw" .Release.Name }}
           image: {{ .Values.rdpgw.image }}

@@ -17,19 +17,19 @@ spec:
       labels:
         app: rdpgw-authelia
     spec:
-      restartPolicy: {{ .Values.rdpgw.restartPolicy  | quote }}
+      restartPolicy: {{ .Values.rdpgw.authelia.restartPolicy  | quote }}
       initContainers:
         - name: {{ printf "%-authelia-init" }}
           image: {{ .Values.rdpgw.authelia.image }}
-          imagePullPolicy: {{ .Values.rdpgw.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.rdpgw.authelia.imagePullPolicy | quote }}
           command:
             - 'sh'
             - '-c'
             - 'sed "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" /configuration.yml > /config/configuration.yml'
       containers:
-        - name: {{ printf "%s-guacamole" .Release.Name }}
-          image: {{ .Values.rdpgw.image }}
-          imagePullPolicy: {{ .Values.rdpgw.imagePullPolicy  | quote }}
+        - name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+          image: {{ .Values.rdpgw.authelia.image }}
+          imagePullPolicy: {{ .Values.rdpgw.authelia.imagePullPolicy  | quote }}
           env:
             - name: AUTHELIA_JWT_SECRET_FILE
               value: /app/secrets/jwt
