@@ -94,14 +94,14 @@ spec:
           secret:
             secretName: {{ printf "%s-rdpgw" .Release.Name }}
             items:
-              - key: jwt_secret
+              - key: authelia_jwt_secret_file
                 path: jwt
-              - key: storage_encryption_key
+              - key: authelia_storage_encryption_key_file
                 path: storage
-              - key: backend_ldap_password
+              - key: authelia_authentication_backend_ldap_password_file
                 path: ldap
-              - key: issuer
+              - key: authelia_identity_providers_oidc_issuer_private_key_file
                 path: issuer
-              - key: hmac
+              - key: authelia_identity_providers_oidc_hmac_secret_file
                 path: hmac
 {{- end }}
