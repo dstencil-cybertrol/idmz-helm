@@ -25,7 +25,7 @@ spec:
           command:
             - 'sh'
             - '-c'
-            - 'sed -e "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" -e "s:\$RDPGW_OPEN_ID_DNS_NAME:${RDPGW_OPEN_ID_DNS_NAME}:g" /configuration.yml > /config/configuration.yml'
+            - 'sed -e "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" -e "s:\$RDPGW_OPEN_ID_DNS_NAME:${RDPGW_OPEN_ID_DNS_NAME}:g" /configuration.yml > /config/configuration.yml && cat /config/configuration.yml'
           volumeMounts:
             - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
               mountPath: /configuration.yml
