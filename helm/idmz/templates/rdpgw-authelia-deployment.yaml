@@ -22,10 +22,18 @@ spec:
         - name: {{ printf "%s-authelia-init" .Release.Name }}
           image: {{ .Values.rdpgw.authelia.image }}
           imagePullPolicy: {{ .Values.rdpgw.authelia.imagePullPolicy | quote }}
+          env:
+            - name: RDPGW_OPEN_ID__CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rdpgw" .Release.Name }}
+                  key: rdpgw_open_id__client_secret
+            - name: RDPGW_OPEN_ID_DNS_NAME
+              value: {{ tpl .Values.rdpgw.dnsName . }}
           command:
             - 'sh'
             - '-c'
-            - 'sed -e "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" -e "s:\$RDPGW_OPEN_ID_DNS_NAME:${RDPGW_OPEN_ID_DNS_NAME}:g" /configuration.yml > /config/configuration.yml && cat /config/configuration.yml'
+            - 'sed -e "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" -e "s:\$RDPGW_OPEN_ID_DNS_NAME:${RDPGW_OPEN_ID_DNS_NAME}:g" /configuration.yml > /config/configuration.yml'
           volumeMounts:
             - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
               mountPath: /configuration.yml
@@ -53,13 +61,6 @@ spec:
               value: {{ tpl .Values.rdpgw.authelia.ldapUrl . }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN
               value: {{ tpl .Values.rdpgw.authelia.ldapBaseDn . }}
-            - name: RDPGW_OPEN_ID__CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-rdpgw" .Release.Name }}
-                  key: rdpgw_open_id__client_secret
-            - name: RDPGW_OPEN_ID_DNS_NAME
-              value: {{ tpl .Values.rdpgw.dnsName . }}
           ports:
             - name: authelia
               containerPort: 9091
