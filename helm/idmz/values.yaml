@@ -486,6 +486,7 @@ rdpgw:
               secret: $RDPGW_OPEN_ID__CLIENT_SECRET
               public: false
               authorization_policy: one_factor
+              pre_configured_consent_duration: '99y'
               audience: []
               scopes: 
                 - email
