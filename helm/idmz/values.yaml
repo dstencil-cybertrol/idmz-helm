@@ -164,6 +164,7 @@ squid:
     #Setup logging
     logfile_rotate 0
     acl hasRequest has request
+    acl excluded dstdomain "/whitelists/excluded.txt"
     access_log none !hasRequest
     access_log none excluded
     cache_log stdio:/dev/stdout
