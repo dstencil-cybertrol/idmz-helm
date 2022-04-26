@@ -19,7 +19,7 @@ spec:
     spec:
       restartPolicy: {{ .Values.rdpgw.authelia.restartPolicy  | quote }}
       initContainers:
-        - name: {{ printf "%-authelia-init" }}
+        - name: {{ printf "%s-authelia-init" .Release.Name }}
           image: {{ .Values.rdpgw.authelia.image }}
           imagePullPolicy: {{ .Values.rdpgw.authelia.imagePullPolicy | quote }}
           command:
