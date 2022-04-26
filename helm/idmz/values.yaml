@@ -409,7 +409,7 @@ rdpgw:
       EnableDrive: false
       EnableClipboard: true
     OpenId:
-      ProviderUrl: https://{{ .Values.rdpgw.authelia.dnsName }}
+      # ProviderUrl: set via env RDPGW_OPEN_ID__PROVIDER_URL
       ClientId: rdpgw
       #ClientSecret: # Set via RDPGW_OPEN_ID__CLIENT_SECRET env.
     Client:
@@ -491,7 +491,7 @@ rdpgw:
                 - email
                 - profile
               redirect_uris:
-                - https://{{ .Values.rdpgw.dnsName }}/callback
+                - https://$RDPGW_OPEN_ID_DNS_NAME/callback
               grant_types:
                 - refresh_token
                 - authorization_code
@@ -504,7 +504,7 @@ rdpgw:
               userinfo_signing_algorithm: none
       
       session:
-        domain: {{ .Values.rdpgw.dnsName }}
+        domain: $RDPGW_OPEN_ID_DNS_NAME
         expiration: 1h
         inactivity: 20m
         remember_me_duration: 1h
@@ -520,7 +520,7 @@ rdpgw:
 
       access_control:
         rules:
-        - domain: {{ .Values.rdpgw.dnsName }}
+        - domain: $RDPGW_OPEN_ID_DNS_NAME
           policy: one_factor
 
       notifier:

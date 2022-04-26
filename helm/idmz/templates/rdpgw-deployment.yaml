@@ -50,6 +50,8 @@ spec:
                   key: rdpgw_security__paa_token_encryption_key
             - name: RDPGW_SERVER__TLS_ENABLED
               value: "False"
+            - name: RDPGW_OPEN_ID__PROVIDER_URL
+              value: "https://{{ tpl .Values.rdpgw.authelia.dnsName . }}"
           ports:
             - name: rdpgw
               containerPort: 9443
