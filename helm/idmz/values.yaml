@@ -390,7 +390,7 @@ rdpgw:
     Server:
       # CertFile: /certs/tls.crt # Not used. TLS is configured with ingress.
       # KeyFile: /certs/tls.key # Not used. TLS is configured with ingress.
-      GatewayAddress: {{ .Values.rdpgw.dnsName }}
+      # GatewayAddress: set via RDPGW_SERVER__GATEWAY_ADDRESS env.
       Port: 9443
       Hosts:
     {{- range .Values.rdpgw.hosts }}

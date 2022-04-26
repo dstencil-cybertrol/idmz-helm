@@ -52,6 +52,8 @@ spec:
               value: "False"
             - name: RDPGW_OPEN_ID__PROVIDER_URL
               value: {{ printf "https://%s" (tpl .Values.rdpgw.authelia.dnsName .) }}
+            - name: RDPGW_SERVER__GATEWAY_ADDRESS
+              value: {{ tpl .Values.rdpgw.dnsName . }}
           ports:
             - name: rdpgw
               containerPort: 9443
