@@ -17,7 +17,7 @@ spec:
       labels:
         app: rdpgw-authelia
     spec:
-      restartPolicy: {{ .Values.rdpgwp.restartPolicy  | quote }}
+      restartPolicy: {{ .Values.rdpgw.restartPolicy  | quote }}
       initContainers:
         - name: {{ printf "%-authelia-init" }}
           image: {{ .Values.rdpgw.authelia.image }}
