@@ -86,6 +86,8 @@ spec:
         - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
           configMap:
             name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+        - name: {{ printf "%s-rdpgw-authelia-emptydir-volume" .Release.Name }}
+          emptyDir: {}
         - name: {{ printf "%s-rdpgw-authelia-secrets-volume" .Release.Name }}
           secret:
             secretName: authelia
