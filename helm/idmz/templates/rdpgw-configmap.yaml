@@ -1,4 +1,4 @@
-{{- if and .Values.rdpgw.enabled }}
+{{- if and .Values.rdpgw.enabled .Values.certManager.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
