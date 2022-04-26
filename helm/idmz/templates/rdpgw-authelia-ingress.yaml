@@ -1,0 +1,28 @@
+{{- if and .Values.rdpgw.enabled .Values.rdpgw.authelia.enabled .Values.certManager.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    kubernetes.io/ingress.class: "public"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Method $request_method;
+    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+spec:
+  rules:
+    - host: {{ tpl .Values.rdpgw.authelia.dnsName . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+                port:
+                  number: 9091
+  tls:
+    - hosts:
+      - {{ tpl .Values.rdpgw.authelia.dnsName . }}
+      secretName: {{ printf "%s-rdpgw-authelia-tls" .Release.Name }}
+{{- end }}

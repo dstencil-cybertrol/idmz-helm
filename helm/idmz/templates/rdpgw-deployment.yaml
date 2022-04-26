@@ -1,0 +1,82 @@
+{{- if and .Values.rdpgw.enabled .Values.certManager.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-rdpgw" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.rdpgw.replicas }}
+  selector:
+    matchLabels:
+      app: rdpgw
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/rdpgw-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/rdpgw-secret.yaml") . | sha256sum }}
+      labels:
+        app: rdpgw
+    spec:
+      restartPolicy: {{ .Values.rdpgwp.restartPolicy  | quote }}
+      containers:
+        - name: {{ printf "%s-rdpgw" .Release.Name }}
+          image: {{ .Values.rdpgw.image }}
+          imagePullPolicy: {{ .Values.rdpgw.imagePullPolicy  | quote }}
+          env:
+            - name: RDPGW_SERVER__SESSION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rdpgw" .Release.Name }}
+                  key: rdpgw_server__session_key
+            - name: RDPGW_SERVER__SESSION_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rdpgw" .Release.Name }}
+                  key: rdpgw_server__session_encryption_key
+            - name: RDPGW_OPEN_ID__CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rdpgw" .Release.Name }}
+                  key: rdpgw_open_id__client_secret
+            - name: RDPGW_SECURITY__PAA_TOKEN_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rdpgw" .Release.Name }}
+                  key: rdpgw_security__paa_token_signing_key
+            - name: RDPGW_SECURITY__PAA_TOKEN_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rdpgw" .Release.Name }}
+                  key: rdpgw_security__paa_token_encryption_key
+            - name: RDPGW_SERVER__TLS_ENABLED
+              value: False
+          ports:
+            - name: rdpgw
+              containerPort: 9443
+          volumeMounts:
+            - name: {{ printf "%s-rdpgw-configmap-volume" .Release.Name }}
+              mountPath: "/opt/rdpgw/rdpgw.yaml"
+              subPath: rdpgw.yaml
+          startupProbe:
+            tcpSocket:
+              port: 9443
+            failureThreshold: 45
+            periodSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: 9443
+            initialDelaySeconds: 1
+            periodSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 9443
+            initialDelaySeconds: 1
+            periodSeconds: 1
+      volumes:
+        - name: {{ printf "%s-rdpgw-configmap-volume" .Release.Name }}
+          configMap:
+            name: {{ printf "%s-rdpgw" .Release.Name }}
+            items:
+            - key: rdpgw.yaml
+              path: rdpgw.yaml
+{{- end }}

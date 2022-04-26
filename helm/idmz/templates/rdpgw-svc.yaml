@@ -1,0 +1,14 @@
+{{- if and .Values.rdpgw.enabled .Values.certManager.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rdpgw" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 9443
+      targetPort: 9443
+  selector:
+    app: rdpgw
+{{- end }}

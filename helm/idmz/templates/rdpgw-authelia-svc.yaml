@@ -1,0 +1,14 @@
+{{- if and .Values.rdpgw.enabled .Values.rdpgw.authelia.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 9091
+      targetPort: 9091
+  selector:
+    app: rdpgw-authelia
+{{- end }}

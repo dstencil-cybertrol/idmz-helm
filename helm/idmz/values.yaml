@@ -17,8 +17,9 @@ global:
   # - guacamole.properties: ldap-user-base-dn: CN=Users,{{ .Values.global.ldapBaseDn }}
   # - guacamole.users.ldapBaseDn: '{{ .Values.global.ldapBaseDn }}'
   # - guacamole.users.autoConnections: domain: '{{ .Values.global.baseDomain }}'
-  baseDomain: "" # testdomain.com
-  ldapBaseDn: "" # DC=testdomain,DC=com
+  baseDomain: "" # testdomain.local
+  ldapBaseDn: "" # DC=testdomain,DC=local
+  publicBaseDomain: "" # testdomain.com
 
 ingress:
   # ingress is used to serve http traffic to various backends.
@@ -138,11 +139,33 @@ squid:
     ubuntu.txt: |
       archive.ubuntu.com
       api.snapcraft.io
+      .snapcraftcontent.com
+    excluded.txt: |
+      settings-win.data.microsoft.com
+      ent-shasta-rrs.symantec.com
+      update.googleapis.com
+    kubernetes.txt: |
+      k8s.gcr.io
+      storage.googleapis.com
+      docker.io
+      registry-1.docker.io
+      auth.docker.io
+      www.docker.com
+      cybertrol-engineering.github.io
+      charts.jetstack.io
+      bitnami-labs.github.io
+      production.cloudflare.docker.com
+      ghcr.io
+      pkg-containers.githubusercontent.com
+      github.com
+      objects.githubusercontent.com
+      .quay.io
   cfg: |
     #Setup logging
     logfile_rotate 0
     acl hasRequest has request
     access_log none !hasRequest
+    access_log none excluded
     cache_log stdio:/dev/stdout
     access_log stdio:/dev/stdout
     cache_store_log stdio:/dev/stdout
@@ -161,7 +184,7 @@ squid:
     cache deny all
 
     #Support email for failure page.
-    cache_mgr support@domain.local
+    cache_mgr support@testdomain.local
 
     #Set source clients
     acl test_src src all
@@ -186,11 +209,11 @@ dnsmasq:
   # Example: --server=[/[<domain>]/[domain/]][<ipaddr>[#<port>]][@<interface>][@<source-ip>[#<port>]]
   # See the dnsmasq man page for more details.
   # The following example sets the default upstream server to 192.168.1.159
-  # and the upstream server for requests to domain.com to 192.168.1.160. 
+  # and the upstream server for requests to testdomain.local to 192.168.1.160. 
   args: []
     # Example:
     # - --server=192.168.1.159
-    # - --server=/domain.com/192.168.1.160
+    # - --server=/testdomain.local/192.168.1.160
 
 smtp:
   enabled: false
@@ -241,7 +264,7 @@ guacamole:
   replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
-  dnsName: "" # Example: guacamole.domain.com
+  dnsName: "guacamole.{{ .Values.global.publicBaseDomain }}" # Example: guacamole.testdomain.com
   ldapBindUser: CN=guacuser,CN=Users,{{ .Values.global.ldapBaseDn }}
   debug: false
   properties: |
@@ -315,7 +338,7 @@ guacamole:
     #     connections:
     #      - defaults: true
     #        connection:
-    #          connection_name: 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    #          connection_name: 'TEST-CONNECTION.domain.local - 192.168.1.160'
     #        parameters:
     #          hostname: '192.168.1.160'
     #   #parameters section and specific paramters are only required if they are not the defaults.
@@ -324,9 +347,9 @@ guacamole:
     #   # will have permission to connect with the specific connection.
     #   manual_permissions:
     #     "Domain Users":
-    #       - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    #       - 'TEST-CONNECTION.domain.local - 192.168.1.160'
     #     ThisIsATestGroup:
-    #       - 'TEST-CONNECTION.domain.com - 192.168.1.160'
+    #       - 'TEST-CONNECTION.domain.local - 192.168.1.160'
     autoConnections: |
       connection:
         protocol: 'rdp'
@@ -345,27 +368,161 @@ guacamole:
         password: '${GUAC_PASSWORD}'
         domain: '{{ .Values.global.baseDomain }}'
     
-# rdpgw:
-#   enabled: false
-  # secrets:
-  #   autheliaJwtSecret: 
-  #   autheliaStorageEncryptionKey: 
-  #   autheliaBackendLdapPassword: 
-  #   autheliaIssuer: 
-  #   autheliaHmac: 
-  #   rdpwSessionKey:
-  #   rdpgwSessionEncryptionKey:
-  #   rdpgwOidcClientSecret:
-  #   rdpgwPaaTokenSigningKey:
-  #   rdpgwUserTokenEncryptionKey:
-#   version: latest
-#   replicas: 1
-#   restartPolicy: Always
-#   imagePullPolicy: Always
-#   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
-#   sharedIp: true
-#   # authenticationUrl:
-#   # hosts:
-#   #   dnsName: hostIp
-#   #   i.e.
-#   #   host1.rdpgw.demo.com: 192.168.1.2
+rdpgw:
+  enabled: false
+  image: alphabet5/rdpgw:latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  secrets:
+    serverSessionKey:
+    serverSessionEncryptionKey:
+    openIdClientSecret:
+    securityPaaTokenSigningKey:
+    securityPaaTokenEncryptionKey:
+  hosts: []
+    # Example:
+    # - host1.demo.com:3389
+    # - 1.2.3.4:3389
+  dnsName: "rdpgw.{{ .Values.global.publicBaseDomain }}" # rdpgw.domain.com
+  configTemplate: |
+    Server:
+      # CertFile: /certs/tls.crt # Not used. TLS is configured with ingress.
+      # KeyFile: /certs/tls.key # Not used. TLS is configured with ingress.
+      GatewayAddress: {{ .Values.rdpgw.dnsName }}
+      Port: 9443
+      Hosts:
+    {{- range .Values.rdpgw.hosts }}
+        - {{ . }}
+    {{- end }}
+      RoundRobin: false
+      # SessionKey: # Set via RDPGW_SERVER__SESSION_KEY env.
+      # SessionEncryptionKey: # Set via RDPGW_SERVER__SESSION_ENCRYPTION_KEY env.
+    Caps:
+      SmartCardAuth: false
+      TokenAuth: true
+      IdleTimeout: 0 # connection timeout in minutes, 0 is limitless
+      EnablePrinter: false
+      EnablePort: false
+      EnablePnp: false
+      EnableDrive: false
+      EnableClipboard: true
+    OpenId:
+      ProviderUrl: https://{{ .Values.rdpgw.authelia.dnsName }}
+      ClientId: rdpgw
+      #ClientSecret: # Set via RDPGW_OPEN_ID__CLIENT_SECRET env.
+    Client:
+      UsernameTemplate: "{{ "{{" }} username {{ "}}" }}@{{ .Values.global.baseDomain }}"
+      # rdp file settings see: 
+      # https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/rdp-files
+      NetworkAutoDetect: 0
+      BandwidthAutoDetect: 1
+      ConnectionType: 6
+      # If true puts splits "user@testdomain.local" into the user and domain component so that
+      # domain gets set in the rdp file and the domain name is stripped from the username
+      SplitUserDomain: true
+    Security:
+      # a random string of at least 32 characters to secure cookies on the client
+      # make sure to share this amongst different pods
+      # PAATokenSigningKey: set via RDPGW_SECURITY__PAA_TOKEN_SIGNING_KEY env.
+      # PAATokenEncryptionKey: set via RDPGW_SECURITY__PAA_TOKEN_ENCRYPTION_KEY env.
+      # UserTokenEncryptionKey: "" Not used.
+      # if you want to enable token generation for the user
+      # if true the username will be set to a jwt with the username embedded into it
+      EnableUserToken: false
+      # Verifies if the ip used to connect to download the rdp file equals from where the connection is opened.
+      VerifyClientIp: false 
+  authelia:
+    enabled: true
+    image: authelia/authelia:latest
+    replicas: 1
+    restartPolicy: Always
+    imagePullPolicy: Always
+    dnsName: "auth.{{ .Values.global.publicBaseDomain }}" # example: auth.domain.com
+    secrets:
+      jwtSecret: "" # Random 32 characters.
+      storageEncryptionKey: "" # Random 64 characters.
+      backendLdapPassword: "" # # Password for the ldap backend.
+      issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia rsa generate --dir /keys`
+      hmac: "" # random string that gets hashed with sha256 to sign the jwt.
+    ldapUrl: "ldap://{{ .Values.global.baseDomain }}"
+    ldapBaseDn: {{ .Values.global.ldapBaseDn }}
+    ldapUser: "CN=autheliaUser,CN=Users,{{ .Values.global.ldapBaseDn }}" # CN=username,CN=Users,DC=domain,DC=com
+    config: |
+      theme: dark
+
+      server:
+        host: 0.0.0.0
+        port: 9091
+
+      log:
+        level: debug
+
+      authentication_backend:
+        disable_reset_password: true
+        refresh_interval: 5m
+        ldap:
+          implementation: custom
+          url: {ldap}
+          base_dn: DC=suppcn,DC=com
+          username_attribute: sAMAccountName
+          users_filter: (&({username_attribute}={input})(objectCategory=user))
+          groups_filter: (&(member={dn})(objectClass=group)(objectCategory=group))
+          mail_attribute: mail
+          display_name_attribute: displayName
+          user: {user}
+      identity_providers:
+        oidc:
+          access_token_lifespan: 1h
+          authorize_code_lifespan: 1m
+          id_token_lifespan: 1h
+          refresh_token_lifespan: 90m
+          enable_client_debug_messages: false
+          enforce_pkce: public_clients_only
+          clients:
+            - id: rdpgw
+              description: Remote Desktop Gateway
+              secret: $RDPGW_OPEN_ID__CLIENT_SECRET
+              public: false
+              authorization_policy: one_factor
+              audience: []
+              scopes: 
+                - email
+                - profile
+              redirect_uris:
+                - https://{{ .Values.rdpgw.dnsName }}/callback
+              grant_types:
+                - refresh_token
+                - authorization_code
+              response_types:
+                - code
+              response_modes:
+                - form_post
+                - query
+                - fragment
+              userinfo_signing_algorithm: none
+      
+      session:
+        domain: {{ .Values.rdpgw.dnsName }}
+        expiration: 1h
+        inactivity: 20m
+        remember_me_duration: 1h
+      
+      regulation:
+        max_retries: 30
+        find_time: 2m
+        ban_time: 2m
+      
+      storage:
+        local:
+          path: /config/db.sqlite3
+
+      access_control:
+        rules:
+        - domain: {{ .Values.rdpgw.dnsName }}
+          policy: one_factor
+
+      notifier:
+        disable_startup_check: true
+        filesystem:
+          filename: /config/notification.txt

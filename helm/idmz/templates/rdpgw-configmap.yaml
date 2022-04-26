@@ -1,0 +1,10 @@
+{{- if and .Values.rdpgw.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rdpgw" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  rdpgw.yaml: |
+{{ tpl .Values.rdpgw.rdpgw.configTemplate . | indent 4 }}
+{{- end }}

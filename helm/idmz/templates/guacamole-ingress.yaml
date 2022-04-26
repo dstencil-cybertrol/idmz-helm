@@ -11,7 +11,7 @@ metadata:
     cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
 spec:
   rules:
-    - host: {{ .Values.guacamole.dnsName }}
+    - host: {{ tpl .Values.guacamole.dnsName . }}
       http:
         paths:
           - path: /
@@ -23,6 +23,6 @@ spec:
                   number: 8080
   tls:
     - hosts:
-      - {{ .Values.guacamole.dnsName }}
+      - {{ tpl .Values.guacamole.dnsName . }}
       secretName: {{ printf "%s-guacamole-tls" .Release.Name }}
 {{- end }}

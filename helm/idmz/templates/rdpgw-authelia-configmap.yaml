@@ -1,0 +1,10 @@
+{{- if and .Values.rdpgw.enabled .Values.rdpgw.authelia.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  rdpgw.yaml: |
+{{ tpl .Values.rdpgw.authelia.config . | indent 4 }}
+{{- end }}

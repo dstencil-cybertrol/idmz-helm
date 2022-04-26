@@ -1,0 +1,32 @@
+{{- if and .Values.rdpgw.enabled .Values.certManager.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-rdpgw" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    kubernetes.io/ingress.class: "public"
+    nginx.ingress.kubernetes.io/service-upstream: true
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Method $request_method;
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "36000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "36000"
+    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+spec:
+  rules:
+  - host: {{ tpl .Values.rdpgw.dnsName . }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ printf "%s-rdpgw" .Release.Name }}
+            port:
+              number: 9443
+  tls:
+  - hosts:
+    - {{ tpl .Values.rdpgw.dnsName . }}
+    secretName: {{ printf "%s-rdpgw-tls" .Release.Name }}
+{{- end }}
