@@ -464,14 +464,14 @@ rdpgw:
         refresh_interval: 5m
         ldap:
           implementation: custom
-          url: {ldap}
-          base_dn: DC=suppcn,DC=com
+          # url: configured via env
+          # base_dn: configured via env
           username_attribute: sAMAccountName
           users_filter: (&({username_attribute}={input})(objectCategory=user))
           groups_filter: (&(member={dn})(objectClass=group)(objectCategory=group))
           mail_attribute: mail
           display_name_attribute: displayName
-          user: {user}
+          # user: configured via env
       identity_providers:
         oidc:
           access_token_lifespan: 1h

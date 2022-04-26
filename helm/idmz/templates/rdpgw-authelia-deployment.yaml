@@ -47,6 +47,12 @@ spec:
               value: /app/secrets/issuer
             - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
               value: /app/secrets/hmac
+            - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER
+              value: {{ tpl .Values.rdpgw.authelia.ldapUser . }}
+            - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_URL
+              value: {{ tpl .Values.rdpgw.authelia.ldapUrl . }}
+            - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN
+              value: {{ tpl .Values.rdpgw.authelia.ldapBaseDn . }}
             - name: RDPGW_OPEN_ID__CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
