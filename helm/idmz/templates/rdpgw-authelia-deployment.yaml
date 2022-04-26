@@ -51,7 +51,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ printf "%s-rdpgw" .Release.Name }}
-                  key: rdpgw_open_id__cilent_secret
+                  key: rdpgw_open_id__client_secret
             - name: RDPGW_OPEN_ID_DNS_NAME
               value: {{ tpl .Values.rdpgw.dnsName . }}
           ports:
