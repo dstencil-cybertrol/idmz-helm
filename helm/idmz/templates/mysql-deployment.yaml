@@ -13,7 +13,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/mysql-configmap.yaml") . | sha256sum }}
-        checksum/config: {{ include (print $Template.BasePath "/guacamole-secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/guacamole-secret.yaml") . | sha256sum }}
       labels:
         app: mysql
     spec:
