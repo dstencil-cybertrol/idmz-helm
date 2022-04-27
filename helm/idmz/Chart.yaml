@@ -1,6 +1,6 @@
 apiVersion: v2
 name: idmz
-version: "0.0.23-alpha.68"
+version: "0.0.23-alpha.69"
 description: Helm chart for common IDMZ applications.
 type: application
 keywords:

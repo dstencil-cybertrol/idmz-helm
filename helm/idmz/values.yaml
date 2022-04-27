@@ -521,7 +521,7 @@ rdpgw:
 
       access_control:
         rules:
-        - domain: $RDPGW_OPEN_ID_SESSION_DOMAIN
+        - domain: $RDPGW_OPEN_ID_DNS_NAME
           policy: one_factor
 
       notifier:
