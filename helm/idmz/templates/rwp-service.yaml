@@ -19,7 +19,9 @@ metadata:
   namespace: {{ $.Release.Namespace | quote }}
 subsets:
   - addresses:
-      - ip: {{ .backend.host }}
+      {{- range .backend.ips }}
+      - ip: {{ . }}
+      {{- end }}
     ports:
       - port: {{ .backend.port }}
 {{- end }}

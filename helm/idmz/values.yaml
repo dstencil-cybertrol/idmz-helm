@@ -42,7 +42,9 @@ rwp:
     ## Example Configuration:
     # - frontend: idmzk8s.demo.com
     #   backend:
-    #     host: 1.2.3.5
+    #     ips: 
+    #       - 1.2.3.5
+    #       - 1.2.3.6
     #     port: 16443
     #   overrideAnnotations: |
     #     kubernetes.io/ingress.class: public
@@ -52,7 +54,8 @@ rwp:
     #     nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
     # - frontend: prodk8s.demo.com
     #   backend:
-    #     host: 1.2.3.4
+    #     ips: 
+    #       - 1.2.3.4
     #     port: 16443
     #   overrideAnnotations: |
     #     kubernetes.io/ingress.class: public
