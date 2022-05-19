@@ -9,7 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/service-upstream: "true"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Method $request_method;
-    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+    cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
 spec:
   rules:
     - host: {{ tpl .Values.rdpgw.authelia.dnsName . }}

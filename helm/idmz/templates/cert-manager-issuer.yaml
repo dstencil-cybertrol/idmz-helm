@@ -2,14 +2,22 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: {{ printf "%s-letsencrypt" .Release.Name }}
+  name: {{ printf "%s-cert-manager" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
   acme:
     email: {{ .Values.certManager.email }}
-    server: {{ .Values.certManager.letsEncryptServer }}
+    server: {{ .Values.certManager.acmeServer }}
+    {{- if ne .Values.certManager.acmeExternalAccountKeyId "" }}
+    externalAccountBinding:
+      keyID: {{ .Values.certManager.acmeExternalAccountKeyId }}
+      keySecretRef:
+        name: {{ printf "%s-cert-manager-external-account-key" .Release.Name }}
+        key: acme_external_account_key
+      keyAlgorithm: HS256
+    {{- end }}
     privateKeySecretRef:
-      name: {{ printf "%s-letsencrypt-private-key" .Release.Name }}
+      name: {{ printf "%s-acme-private-key" .Release.Name }}
     solvers:
       - selector: {}
         dns01:

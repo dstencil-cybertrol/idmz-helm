@@ -10,7 +10,7 @@ metadata:
       proxy_set_header X-Forwarded-Method $request_method;
     nginx.ingress.kubernetes.io/proxy-read-timeout: "36000"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "36000"
-    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+    cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
 spec:
   rules:
   - host: {{ tpl .Values.rdpgw.dnsName . }}

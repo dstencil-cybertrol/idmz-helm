@@ -37,7 +37,7 @@ rwp:
   enabled: false
   defaultAnnotations: |
     kubernetes.io/ingress.class: public
-    cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+    cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
   rules: []
     ## Example Configuration:
     # - frontend: idmzk8s.demo.com
@@ -48,7 +48,7 @@ rwp:
     #     port: 16443
     #   overrideAnnotations: |
     #     kubernetes.io/ingress.class: public
-    #     cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+    #     cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
     #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     #     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
     #     nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
@@ -59,7 +59,7 @@ rwp:
     #     port: 16443
     #   overrideAnnotations: |
     #     kubernetes.io/ingress.class: public
-    #     cert-manager.io/issuer: {{ printf "%s-letsencrypt" .Release.Name }}
+    #     cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
     #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     #     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
     #     nginx.ingress.kubernetes.io/auth-tls-verify-client: "off"
@@ -72,10 +72,13 @@ certManager:
   enabled: false
   secrets:
     route53SecretAccessKey: ""
+    acmeExternalAccountKey: ""
   email: ""
-  # ACME staging is used by default. To use for production, change the url to:
+  # LetsEncrypt ACME staging is used by default. To use for production, change the url to:
   # https://acme-v02.api.letsencrypt.org/directory
-  letsEncryptServer: https://acme-staging-v02.api.letsencrypt.org/directory 
+  # For ZeroSSL, change the URL to https://acme.zerossl.com/v2/DV90
+  acmeServer: https://acme-staging-v02.api.letsencrypt.org/directory
+  acmeExternalAccountKeyId: ""
   route53Region: us-east-1
   route53HostedZoneId: ""
   route53AccessKeyId: ""
