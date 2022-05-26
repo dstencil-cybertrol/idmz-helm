@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 spec:
   selector:
-    name: {{ .Values.ingress.selector }} 
+    {{ .Values.ingress.selector }} 
   ports:
     - name: http
       protocol: TCP

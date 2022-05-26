@@ -32,8 +32,8 @@ ingress:
   # dedicated ip address for each service.
   loadBalancerIpAddress: 1.2.3.4
   sharedIp: true
-  # When using 'microk8s enable ingress' selector should be 'nginx-ingress-microk8s' if installing with helm then use 'nginx-ingress'
-  selector: nginx-ingress-microk8s
+  # When using 'microk8s enable ingress' selector should be 'name: nginx-ingress-microk8s' if installing with helm then use 'app.kubernetes.io/name: ingress-nginx'
+  selector: "name: nginx-ingress-microk8s"
 
 rwp:
   enabled: false
