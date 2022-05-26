@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 spec:
   selector:
-    name: nginx-ingress-microk8s
+    name: {{ .Values.ingress.selector }} 
   ports:
     - name: http
       protocol: TCP
