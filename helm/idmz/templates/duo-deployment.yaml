@@ -16,6 +16,13 @@ spec:
       labels:
         app: duo-auth-proxy
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: duo-auth-proxy
       restartPolicy: {{ .Values.duo.restartPolicy | quote}}
       containers:
         - name: {{ printf "%s-duo-auth-proxy" .Release.Name }}

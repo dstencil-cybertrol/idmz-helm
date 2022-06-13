@@ -17,6 +17,13 @@ spec:
       labels:
         app: rdpgw
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: rdpgw
       restartPolicy: {{ .Values.rdpgw.restartPolicy  | quote }}
       containers:
         - name: {{ printf "%s-rdpgw" .Release.Name }}

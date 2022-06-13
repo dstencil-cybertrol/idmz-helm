@@ -17,6 +17,13 @@ spec:
       labels:
         app: rdpgw-authelia
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: rdpgw-authelia
       restartPolicy: {{ .Values.rdpgw.authelia.restartPolicy  | quote }}
       initContainers:
         - name: {{ printf "%s-authelia-init" .Release.Name }}
