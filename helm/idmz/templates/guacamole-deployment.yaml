@@ -244,19 +244,25 @@ spec:
           startupProbe:
             exec:
               command:
-                - /bin/bash -c "nc -z 127.0.0.1 4822 || exit 1"
+                - /bin/bash 
+                - -c 
+                - "nc -z 127.0.0.1 4822 || exit 1"
             failureThreshold: 45
             periodSeconds: 1
           readinessProbe:
             exec:
               command:
-                - /bin/bash -c "nc -z 127.0.0.1 4822 || exit 1"
+                - /bin/bash 
+                - -c 
+                - "nc -z 127.0.0.1 4822 || exit 1"
             initialDelaySeconds: 1
             periodSeconds: 1
           livenessProbe:
             exec:
               command:
-                - /bin/bash -c "nc -z 127.0.0.1 4822 || exit 1"
+                - /bin/bash 
+                - -c 
+                - "nc -z 127.0.0.1 4822 || exit 1"
             initialDelaySeconds: 1
             periodSeconds: 1
       volumes:
