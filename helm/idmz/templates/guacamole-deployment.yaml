@@ -286,4 +286,6 @@ spec:
             name: {{ printf "%s-mysql" .Release.Name }}
         - name: {{ printf "%s-mysql-volume" .Release.Name }}
           emptyDir: {}
+        - name: {{ printf "%s-guacd-shared-volume" .Release.Name }}
+          emptyDir: {}
 {{- end }}
