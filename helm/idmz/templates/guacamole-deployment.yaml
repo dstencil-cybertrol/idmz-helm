@@ -29,7 +29,148 @@ spec:
           volumeMounts:
             - name: {{ printf "%s-guacamole-extensions-volume" .Release.Name }}
               mountPath: "/emptydir/"
+        - name: {{ printf "%s-mysql-init" .Release.Name }}
+          image: {{ .Values.guacamole.image }}
+          command:
+            - '/bin/bash'
+            - '-c'
+            - '/opt/guacamole/bin/initdb.sh --mysql > /mysqlinit/initdb.sql'
+          volumeMounts:
+            - name: {{ printf "%s-mysql-guac-init-volume" .Release.Name }}
+              mountPath: "/mysqlinit/"
+        
       containers:
+        - name: {{ printf "%s-mysql" .Release.Name }}
+          image: {{ .Values.guacamole.sql.image }}
+          imagePullPolicy: {{ .Values.guacamole.sql.imagePullPolicy | quote }}
+          env:
+            - name: MYSQL_USER
+              value: {{ .Values.guacamole.sql.mysqlUser }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: mysql_password
+            - name: MYSQL_DATABASE
+              value: {{ .Values.guacamole.sql.usersDatabase }}
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: mysql_root_password
+            - name: GUACADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: guac_admin_password
+          # ports:
+          #   - name: mysql
+          #     containerPort: 3306
+          volumeMounts:
+            - name: {{ printf "%s-mysql-guac-init-volume" .Release.Name }}
+              mountPath: "/mysqlinit/"
+            - name: {{ printf "%s-mysql-init-volume" .Release.Name }}
+              mountPath: "/docker-entrypoint-initdb.d/initdb.sh"
+              subPath: "initdb.sh"
+            - name: {{ printf "%s-mysql-volume" .Release.Name }}
+              mountPath: "/var/lib/mysql/"
+          startupProbe:
+            exec:
+              command:
+                - 'mysqladmin'
+                - 'ping'
+                - '-h'
+                - 'localhost'
+            failureThreshold: 60
+            periodSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - 'mysqladmin'
+                - 'ping'
+                - '-h'
+                - 'localhost'
+            initialDelaySeconds: 1
+            periodSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - 'mysqladmin'
+                - 'ping'
+                - '-h'
+                - 'localhost'
+            initialDelaySeconds: 1
+            periodSeconds: 1
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+        - name: {{ printf "%s-guacamole-users" .Release.Name }}
+          image: {{ .Values.guacamole.users.image }}
+          imagePullPolicy: {{ .Values.guacamole.users.imagePullPolicy | quote }}
+          env:
+            - name: DEBUG
+              value: {{ .Values.guacamole.users.debug | quote }}
+            - name: MYSQL_HOSTNAME
+              value: localhost #{{ printf "%s-mysql" .Release.Name }}
+            - name: MYSQL_DATABASE
+              value: {{ .Values.guacamole.sql.usersDatabase | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.guacamole.sql.mysqlUser | quote }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: mysql_password
+            - name: CFG_AUTO_CONNECTION_DNS
+              value: {{ .Values.guacamole.users.autoConnectionDns | quote }}
+            - name: CFG_AUTO_CONNECTION_DNS_RESOLVER
+              value: {{ .Values.guacamole.users.autoConnectionDnsResolver | quote }}
+            - name: GUAC_ADMIN_GROUPS
+              value: {{ .Values.guacamole.users.guacAdminGroups | quote }}
+            - name: LDAP_BASE_DN
+              value: {{ tpl .Values.guacamole.users.ldapBaseDn . | quote }}
+            - name: LDAP_COMPUTER_FILTER
+              value: {{ .Values.guacamole.users.ldapComputerFilter | quote }}
+            - name: LDAP_GROUP_NAME_FROM_CONN_NAME_REGEX
+              value: {{ .Values.guacamole.users.ldapGroupNameFromConnNameRegex | quote }}
+            - name: LDAP_GROUP_NAME_MOD
+              value: {{ .Values.guacamole.users.ldapGroupNameMod | quote }}
+            - name: LDAP_SEARCH_BIND_DN
+              value: {{ tpl .Values.guacamole.ldapBindUser . | quote}}
+            - name: LDAP_SEARCH_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-guacamole" .Release.Name }}
+                  key: ldap_bind_password
+            - name: REFRESH_SPEED
+              value: {{ .Values.guacamole.users.refreshSpeed | quote }}
+            - name: MANUAL_ONLY
+              value: {{ .Values.guacamole.users.manualOnly | quote }}
+          volumeMounts:
+          {{- if .Values.guacamole.users.manualConnections }}
+            - name: {{ printf "%s-guacamole-users-volume" .Release.Name }}
+              mountPath: "/configs/manual-connections.yaml"
+              subPath: "manual-connections.yaml"
+          {{- end }}
+          {{- if .Values.guacamole.users.autoConnections }}
+            - name: {{ printf "%s-guacamole-users-volume" .Release.Name }}
+              mountPath: "/configs/auto-connections.yaml"
+              subPath: "auto-connections.yaml"
+          {{- end }}
+            - name: {{ printf "%s-guacamole-properties-volume" .Release.Name }}
+              mountPath: "/configs/guacamole.properties"
+              subPath: "guacamole.properties"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
         - name: {{ printf "%s-guacamole" .Release.Name }}
           image: {{ .Values.guacamole.image }}
           imagePullPolicy: {{ .Values.guacamole.imagePullPolicy  | quote }}
@@ -50,10 +191,10 @@ spec:
             - name: MYSQL_DATABASE
               value: {{ .Values.guacamole.sql.usersDatabase }}
             - name: MYSQL_HOSTNAME
-              value: {{ printf "%s-mysql" .Release.Name }}
+              value: localhost #{{ printf "%s-mysql" .Release.Name }}
           {{- end }}
             - name: GUACD_HOSTNAME
-              value: {{ printf "%s-guacd" .Release.Name }}
+              value: localhost #{{ printf "%s-guacd" .Release.Name }}
             - name: GUACAMOLE_HOME
               value: /etc/guacamole
             - name: LDAP_SEARCH_BIND_DN
@@ -92,6 +233,32 @@ spec:
               port: 8080
             initialDelaySeconds: 1
             periodSeconds: 1
+        - name: {{ printf "%s-guacd" .Release.Name }}
+          image: {{ .Values.guacamole.guacd.image }}
+          imagePullPolicy: {{ .Values.guacamole.guacd.imagePullPolicy | quote}}
+          # ports:
+          #   - containerPort: 4822
+          volumeMounts:
+            - name: {{ printf "%s-guacd-shared-volume" .Release.Name }}
+              mountPath: "/shared/"
+          startupProbe:
+            exec:
+              command:
+                - /bin/bash -c "nc -z 127.0.0.1 4822 || exit 1"
+            failureThreshold: 45
+            periodSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash -c "nc -z 127.0.0.1 4822 || exit 1"
+            initialDelaySeconds: 1
+            periodSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash -c "nc -z 127.0.0.1 4822 || exit 1"
+            initialDelaySeconds: 1
+            periodSeconds: 1
       volumes:
         - name: {{ printf "%s-guacamole-properties-volume" .Release.Name }}
           configMap:
@@ -108,5 +275,15 @@ spec:
               path: logback.xml
         {{- end }}
         - name: {{ printf "%s-guacamole-extensions-volume" .Release.Name }}
+          emptyDir: {}
+        - name: {{ printf "%s-guacamole-users-volume" .Release.Name }}
+          configMap:
+            name: {{ printf "%s-guacamole-users" .Release.Name }}
+        - name: {{ printf "%s-mysql-guac-init-volume" .Release.Name }}
+          emptyDir: { }
+        - name: {{ printf "%s-mysql-init-volume" .Release.Name }}
+          configMap:
+            name: {{ printf "%s-mysql" .Release.Name }}
+        - name: {{ printf "%s-mysql-volume" .Release.Name }}
           emptyDir: {}
 {{- end }}
