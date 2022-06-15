@@ -11,4 +11,5 @@ spec:
       targetPort: 9091
   selector:
     app: rdpgw-authelia
+  sessionAffinity: "ClientIP"
 {{- end }}
