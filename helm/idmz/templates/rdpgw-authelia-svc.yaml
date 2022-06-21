@@ -12,4 +12,6 @@ spec:
   selector:
     app: rdpgw-authelia
   sessionAffinity: "ClientIP"
+  topologyKeys:
+    - "kubernetes.io/hostname"
 {{- end }}
