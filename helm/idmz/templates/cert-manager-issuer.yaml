@@ -1,6 +1,6 @@
 {{ if .Values.certManager.enabled }}
 apiVersion: cert-manager.io/v1
-kind: Issuer
+kind: {{ .Values.certManager.kind }}
 metadata:
   name: {{ printf "%s-cert-manager" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
@@ -21,13 +21,22 @@ spec:
     solvers:
       - selector: {}
         dns01:
+          {{- if eq .Values.certManager.dnsProvider "route53" }}
           route53:
             region: {{ .Values.certManager.route53Region }}
             accessKeyID: {{ .Values.certManager.route53AccessKeyId }}
             secretAccessKeySecretRef:
-              name: {{ printf "%s-cert-manager-route53-key" .Release.Name }}
+              name: {{ printf "%s-cert-manager-dns01-key" .Release.Name }}
               key: secret_access_key
             {{- if ne .Values.certManager.route53HostedZoneId "" }}
             hostedZoneID: {{ .Values.certManager.route53HostedZoneId }}
             {{- end }}
+          {{- end }}
+          {{- if eq .Values.certmanager.dnsProvider "cloudflare" }}
+          cloudflare:
+            email: {{ .Values.certManager.email }}
+            apiTokenSecretRef:
+              name: {{ printf "%s-cert-manager-dns01-key" .Release.Name }}
+              key: secret_access_key
+          {{- end }}
 {{- end }}
