@@ -3,7 +3,6 @@ apiVersion: cert-manager.io/v1
 kind: {{ .Values.certManager.kind }}
 metadata:
   name: {{ printf "%s-cert-manager" .Release.Name }}
-  name: {{ printf "%s-cert-manager-external-account-key" .Release.Name }}
   {{- if eq .Values.certManager.kind "Issuer" }}
   namespace: {{ $.Release.Namespace | quote }}
   {{- end }}
