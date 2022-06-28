@@ -10,7 +10,7 @@ spec:
     server: {{ .Values.certManager.acmeServer }}
     {{- if ne .Values.certManager.acmeExternalAccountKeyId "" }}
     externalAccountBinding:
-      keyID: {{ .Values.certManager.acmeExternalAccountKeyId }}
+      keyID: {{ .Values.certManager.acmeExternalAccountKeyId }} 
       keySecretRef:
         name: {{ printf "%s-cert-manager-external-account-key" .Release.Name }}
         key: acme_external_account_key
@@ -32,7 +32,7 @@ spec:
             hostedZoneID: {{ .Values.certManager.route53HostedZoneId }}
             {{- end }}
           {{- end }}
-          {{- if eq .Values.certmanager.dnsProvider "cloudflare" }}
+          {{- if eq .Values.certManager.dnsProvider "cloudflare" }}
           cloudflare:
             email: {{ .Values.certManager.email }}
             apiTokenSecretRef:
