@@ -14,7 +14,6 @@ spec:
       keySecretRef:
         name: {{ printf "%s-cert-manager-external-account-key" .Release.Name }}
         key: acme_external_account_key
-      keyAlgorithm: HS256
     {{- end }}
     privateKeySecretRef:
       name: {{ printf "%s-acme-private-key" .Release.Name }}
