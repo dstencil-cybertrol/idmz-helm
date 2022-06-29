@@ -1,4 +1,4 @@
-{{- if and .Values.guacamole.enabled .Values.guacamole.sql.enabled .Values.certManager.enabled }}
+{{- if and .Values.guacamole.enabled .Values.guacamole.sql.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -37,9 +37,16 @@ ingress:
 
 rwp:
   enabled: false
+  # Note: If you are using a cluster-issuer, you should change the defaultAnnotations to 'cert-manager.io/cluster-issuer: {{ printf "%s-cert-manager" .Release.Name }}'
   defaultAnnotations: |
     kubernetes.io/ingress.class: public
+    {{- if .Values.certManager.enabled }}
     cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
+    {{- else if eq Values.certManager.kind "ClusterIssuer" }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.name | quote }}
+    {{- else if eq Values.certManager.kind "Issuer" }}
+    cert-manager.io/issuer: {{ .Values.certManager.name | quote }}
+    {{- end }}
   rules: []
     ## Example Configuration:
     # - frontend: idmzk8s.demo.com
@@ -72,9 +79,10 @@ certManager:
   # TLS certs are also used by rdpgw if that is enabled.
   # If certManager is disabled, guacamole and rdpgw will also be disabled.
   enabled: false
-  # Kind can be either Issuer or ClusterIssuer. 
-  # Issuer ClusterIssuer should be used if resources in other namespaces will use the same issuer.
-  kind: Issuer
+  # If cert-manager is disabled, ingress objects will use the name and kind to set the cert-manager.io/(cluster-)issuer annotation..
+  # This is useful if you want to use a ClusterIssuer defined outside of the helm chart.
+  name: cert-manager
+  kind: ClusterIssuer
   secrets:
     dnsSecretAccessKey: ""
     acmeExternalAccountKey: ""
