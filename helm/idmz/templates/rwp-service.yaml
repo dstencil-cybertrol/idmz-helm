@@ -1,4 +1,4 @@
-{{- if and .Values.rwp.enabled .Values.ingress.enabled }}
+{{- if and .Values.rwp.enabled }}
 {{- range .Values.rwp.rules }}
 ---
 apiVersion: v1

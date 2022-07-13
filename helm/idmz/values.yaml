@@ -24,7 +24,7 @@ global:
 ingress:
   # ingress is used to serve http traffic to various backends.
   # It is used by guacamole, rdpgw (and authelia, used for the rdpgw.)
-  # If ingress is disabled, guacamole and rdpgw will also be disabled.
+  # If ingress is disabled, the ingress service must be created externally.
   enabled: false
   # By default all services will share the ingress loadBalancerIpAddress.
   # This will limit src based acls for squid. 
@@ -76,8 +76,7 @@ rwp:
 certManager:
   # certManager (https://cert-manager.io/docs/) is required for tls certificates.
   # TLS certificates are used by the ingress controller that serves traffic for guac. 
-  # TLS certs are also used by rdpgw if that is enabled.
-  # If certManager is disabled, guacamole and rdpgw will also be disabled.
+  # TLS certs are also used by rdpgw and authelia if they are enabled.
   enabled: false
   # If cert-manager is disabled, ingress objects will use the name and kind to set the cert-manager.io/(cluster-)issuer annotation..
   # This is useful if you want to use a ClusterIssuer defined outside of the helm chart.
