@@ -23,9 +23,9 @@ metadata:
     # nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
     {{- if .Values.certManager.enabled }}
     cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
-    {{- else if eq Values.certManager.kind "ClusterIssuer" }}
+    {{- else if eq .Values.certManager.kind "ClusterIssuer" }}
     cert-manager.io/cluster-issuer: {{ .Values.certManager.name | quote }}
-    {{- else if eq Values.certManager.kind "Issuer" }}
+    {{- else if eq .Values.certManager.kind "Issuer" }}
     cert-manager.io/issuer: {{ .Values.certManager.name | quote }}
     {{- end }}
 spec:
