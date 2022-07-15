@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+  name: {{ printf "%s-authelia" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
   annotations:
     kubernetes.io/ingress.class: "public"
@@ -32,11 +32,11 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+                name: {{ printf "%s-authelia" .Release.Name }}
                 port:
                   number: 9091
   tls:
     - hosts:
       - {{ tpl .Values.authelia.dnsName . }}
-      secretName: {{ printf "%s-rdpgw-authelia-tls" .Release.Name }}
+      secretName: {{ printf "%s-authelia-tls" .Release.Name }}
 {{- end }}

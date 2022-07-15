@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+  name: {{ printf "%s-authelia" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
   replicas: {{ .Values.authelia.replicas }}
@@ -25,6 +25,7 @@ spec:
           matchLabels:
             app: authelia
       restartPolicy: {{ .Values.authelia.restartPolicy  | quote }}
+      {{ if and .Values.rdpgw.enabled .Values.authelia.rdpgwInit }}
       initContainers:
         - name: {{ printf "%s-authelia-init" .Release.Name }}
           image: {{ .Values.authelia.image }}
@@ -49,6 +50,7 @@ spec:
               subPath: configuration.yml
             - name: {{ printf "%s-authelia-emptydir-volume" .Release.Name }}
               mountPath: "/config/"
+      {{- end }}
       containers:
         - name: {{ printf "%s-authelia" .Release.Name }}
           image: {{ .Values.authelia.image }}

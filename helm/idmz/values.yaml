@@ -469,6 +469,8 @@ authelia:
   ldapUrl: "ldap://{{ .Values.global.baseDomain }}"
   ldapBaseDn: "{{ .Values.global.ldapBaseDn }}"
   ldapUser: "CN=autheliaUser,CN=Users,{{ .Values.global.ldapBaseDn }}" # CN=username,CN=Users,DC=domain,DC=com
+  # rdpgwInit merges secrets used in RDPGW into the authelia config. $RDPGW_OPEN_ID_DNS_NAME, $RDPGW_OPEN_ID__CLIENT_SECRET, and $RDPGW_OPEN_ID_SESSION_DOMAIN
+  rdpgwInit: true
   config: |
     theme: dark
 
