@@ -453,98 +453,98 @@ rdpgw:
       EnableUserToken: false
       # Verifies if the ip used to connect to download the rdp file equals from where the connection is opened.
       VerifyClientIp: false 
-  authelia:
-    enabled: true
-    image: authelia/authelia:latest
-    replicas: 1
-    restartPolicy: Always
-    imagePullPolicy: Always
-    dnsName: "auth.{{ .Values.global.publicBaseDomain }}" # example: auth.domain.com
-    secrets:
-      jwtSecret: "" # Random 32 characters.
-      storageEncryptionKey: "" # Random 64 characters.
-      backendLdapPassword: "" # # Password for the ldap backend.
-      issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia rsa generate --dir /keys`
-      hmac: "" # random string that gets hashed with sha256 to sign the jwt.
-    ldapUrl: "ldap://{{ .Values.global.baseDomain }}"
-    ldapBaseDn: "{{ .Values.global.ldapBaseDn }}"
-    ldapUser: "CN=autheliaUser,CN=Users,{{ .Values.global.ldapBaseDn }}" # CN=username,CN=Users,DC=domain,DC=com
-    config: |
-      theme: dark
+authelia:
+  enabled: true
+  image: authelia/authelia:latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  dnsName: "auth.{{ .Values.global.publicBaseDomain }}" # example: auth.domain.com
+  secrets:
+    jwtSecret: "" # Random 32 characters.
+    storageEncryptionKey: "" # Random 64 characters.
+    backendLdapPassword: "" # # Password for the ldap backend.
+    issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia rsa generate --dir /keys`
+    hmac: "" # random string that gets hashed with sha256 to sign the jwt.
+  ldapUrl: "ldap://{{ .Values.global.baseDomain }}"
+  ldapBaseDn: "{{ .Values.global.ldapBaseDn }}"
+  ldapUser: "CN=autheliaUser,CN=Users,{{ .Values.global.ldapBaseDn }}" # CN=username,CN=Users,DC=domain,DC=com
+  config: |
+    theme: dark
 
-      server:
-        host: 0.0.0.0
-        port: 9091
+    server:
+      host: 0.0.0.0
+      port: 9091
 
-      log:
-        level: debug
+    log:
+      level: debug
 
-      authentication_backend:
-        disable_reset_password: true
-        refresh_interval: 5m
-        ldap:
-          implementation: custom
-          # url: configured via env
-          # base_dn: configured via env
-          username_attribute: sAMAccountName
-          users_filter: (&({username_attribute}={input})(objectCategory=user))
-          groups_filter: (&(member={dn})(objectClass=group)(objectCategory=group))
-          mail_attribute: mail
-          display_name_attribute: displayName
-          # user: configured via env
-      identity_providers:
-        oidc:
-          access_token_lifespan: 1h
-          authorize_code_lifespan: 1m
-          id_token_lifespan: 1h
-          refresh_token_lifespan: 90m
-          enable_client_debug_messages: false
-          enforce_pkce: public_clients_only
-          clients:
-            - id: rdpgw
-              description: Remote Desktop Gateway
-              secret: $RDPGW_OPEN_ID__CLIENT_SECRET
-              public: false
-              authorization_policy: one_factor
-              pre_configured_consent_duration: '99y'
-              audience: []
-              scopes: 
-                - email
-                - profile
-              redirect_uris:
-                - https://$RDPGW_OPEN_ID_DNS_NAME/callback
-              grant_types:
-                - refresh_token
-                - authorization_code
-              response_types:
-                - code
-              response_modes:
-                - form_post
-                - query
-                - fragment
-              userinfo_signing_algorithm: none
-      
-      session:
-        domain: $RDPGW_OPEN_ID_SESSION_DOMAIN
-        expiration: 1h
-        inactivity: 20m
-        remember_me_duration: 1h
-      
-      regulation:
-        max_retries: 30
-        find_time: 2m
-        ban_time: 2m
-      
-      storage:
-        local:
-          path: /config/db.sqlite3
+    authentication_backend:
+      disable_reset_password: true
+      refresh_interval: 5m
+      ldap:
+        implementation: custom
+        # url: configured via env
+        # base_dn: configured via env
+        username_attribute: sAMAccountName
+        users_filter: (&({username_attribute}={input})(objectCategory=user))
+        groups_filter: (&(member={dn})(objectClass=group)(objectCategory=group))
+        mail_attribute: mail
+        display_name_attribute: displayName
+        # user: configured via env
+    identity_providers:
+      oidc:
+        access_token_lifespan: 1h
+        authorize_code_lifespan: 1m
+        id_token_lifespan: 1h
+        refresh_token_lifespan: 90m
+        enable_client_debug_messages: false
+        enforce_pkce: public_clients_only
+        clients:
+          - id: rdpgw
+            description: Remote Desktop Gateway
+            secret: $RDPGW_OPEN_ID__CLIENT_SECRET
+            public: false
+            authorization_policy: one_factor
+            pre_configured_consent_duration: '99y'
+            audience: []
+            scopes: 
+              - email
+              - profile
+            redirect_uris:
+              - https://$RDPGW_OPEN_ID_DNS_NAME/callback
+            grant_types:
+              - refresh_token
+              - authorization_code
+            response_types:
+              - code
+            response_modes:
+              - form_post
+              - query
+              - fragment
+            userinfo_signing_algorithm: none
+    
+    session:
+      domain: $RDPGW_OPEN_ID_SESSION_DOMAIN
+      expiration: 1h
+      inactivity: 20m
+      remember_me_duration: 1h
+    
+    regulation:
+      max_retries: 30
+      find_time: 2m
+      ban_time: 2m
+    
+    storage:
+      local:
+        path: /config/db.sqlite3
 
-      access_control:
-        rules:
-        - domain: $RDPGW_OPEN_ID_DNS_NAME
-          policy: one_factor
+    access_control:
+      rules:
+      - domain: $RDPGW_OPEN_ID_DNS_NAME
+        policy: one_factor
 
-      notifier:
-        disable_startup_check: true
-        filesystem:
-          filename: /config/notification.txt
+    notifier:
+      disable_startup_check: true
+      filesystem:
+        filename: /config/notification.txt

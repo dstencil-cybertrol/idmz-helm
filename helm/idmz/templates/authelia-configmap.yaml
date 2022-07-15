@@ -1,0 +1,10 @@
+{{- if .Values.authelia.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-authelia" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  configuration.yml: |
+{{ tpl .Values.authelia.config . | indent 4 }}
+{{- end }}

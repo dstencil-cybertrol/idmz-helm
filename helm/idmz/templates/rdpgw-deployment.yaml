@@ -1,4 +1,4 @@
-{{- if and .Values.rdpgw.enabled .Values.certManager.enabled }}
+{{- if .Values.rdpgw.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,7 +58,7 @@ spec:
             - name: RDPGW_SERVER__TLS_ENABLED
               value: "False"
             - name: RDPGW_OPEN_ID__PROVIDER_URL
-              value: {{ printf "https://%s" (tpl .Values.rdpgw.authelia.dnsName .) }}
+              value: {{ printf "https://%s" (tpl .Values.authelia.dnsName .) }}
             - name: RDPGW_SERVER__GATEWAY_ADDRESS
               value: {{ tpl .Values.rdpgw.dnsName . }}
           ports:

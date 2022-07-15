@@ -1,21 +1,21 @@
-{{- if and .Values.rdpgw.enabled .Values.rdpgw.authelia.enabled }}
+{{- if .Values.authelia.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ .Values.rdpgw.authelia.replicas }}
+  replicas: {{ .Values.authelia.replicas }}
   selector:
     matchLabels:
-      app: rdpgw-authelia
+      app: authelia
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/rdpgw-authelia-configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/rdpgw-secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/authelia-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/authelia-secret.yaml") . | sha256sum }}
       labels:
-        app: rdpgw-authelia
+        app: authelia
     spec:
       topologySpreadConstraints:
       - maxSkew: 1
@@ -23,12 +23,12 @@ spec:
         whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
-            app: rdpgw-authelia
-      restartPolicy: {{ .Values.rdpgw.authelia.restartPolicy  | quote }}
+            app: authelia
+      restartPolicy: {{ .Values.authelia.restartPolicy  | quote }}
       initContainers:
         - name: {{ printf "%s-authelia-init" .Release.Name }}
-          image: {{ .Values.rdpgw.authelia.image }}
-          imagePullPolicy: {{ .Values.rdpgw.authelia.imagePullPolicy | quote }}
+          image: {{ .Values.authelia.image }}
+          imagePullPolicy: {{ .Values.authelia.imagePullPolicy | quote }}
           env:
             - name: RDPGW_OPEN_ID__CLIENT_SECRET
               valueFrom:
@@ -44,15 +44,15 @@ spec:
             - '-c'
             - 'sed -e "s:\$RDPGW_OPEN_ID__CLIENT_SECRET:${RDPGW_OPEN_ID__CLIENT_SECRET}:g" -e "s:\$RDPGW_OPEN_ID_DNS_NAME:${RDPGW_OPEN_ID_DNS_NAME}:g" -e "s:\$RDPGW_OPEN_ID_SESSION_DOMAIN:${RDPGW_OPEN_ID_SESSION_DOMAIN}:g" /configuration.yml > /config/configuration.yml'
           volumeMounts:
-            - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
+            - name: {{ printf "%s-authelia-configmap-volume" .Release.Name }}
               mountPath: /configuration.yml
               subPath: configuration.yml
-            - name: {{ printf "%s-rdpgw-authelia-emptydir-volume" .Release.Name }}
+            - name: {{ printf "%s-authelia-emptydir-volume" .Release.Name }}
               mountPath: "/config/"
       containers:
-        - name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
-          image: {{ .Values.rdpgw.authelia.image }}
-          imagePullPolicy: {{ .Values.rdpgw.authelia.imagePullPolicy  | quote }}
+        - name: {{ printf "%s-authelia" .Release.Name }}
+          image: {{ .Values.authelia.image }}
+          imagePullPolicy: {{ .Values.authelia.imagePullPolicy  | quote }}
           env:
             - name: AUTHELIA_JWT_SECRET_FILE
               value: /app/secrets/jwt
@@ -65,19 +65,19 @@ spec:
             - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
               value: /app/secrets/hmac
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER
-              value: {{ tpl .Values.rdpgw.authelia.ldapUser . }}
+              value: {{ tpl .Values.authelia.ldapUser . }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_URL
-              value: {{ tpl .Values.rdpgw.authelia.ldapUrl . }}
+              value: {{ tpl .Values.authelia.ldapUrl . }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN
-              value: {{ tpl .Values.rdpgw.authelia.ldapBaseDn . }}
+              value: {{ tpl .Values.authelia.ldapBaseDn . }}
           ports:
             - name: authelia
               containerPort: 9091
           volumeMounts:
-            - name: {{ printf "%s-rdpgw-authelia-secrets-volume" .Release.Name }}
+            - name: {{ printf "%s-authelia-secrets-volume" .Release.Name }}
               mountPath: /app/secrets
               readOnly: true
-            - name: {{ printf "%s-rdpgw-authelia-emptydir-volume" .Release.Name }}
+            - name: {{ printf "%s-authelia-emptydir-volume" .Release.Name }}
               mountPath: "/config/"
           startupProbe:
             httpGet:
@@ -104,17 +104,17 @@ spec:
             periodSeconds: 5
             failureThreshold: 5
       volumes:
-        - name: {{ printf "%s-rdpgw-authelia-configmap-volume" .Release.Name }}
+        - name: {{ printf "%s-authelia-configmap-volume" .Release.Name }}
           configMap:
-            name: {{ printf "%s-rdpgw-authelia" .Release.Name }}
+            name: {{ printf "%s-authelia" .Release.Name }}
             items:
             - key: configuration.yml
               path: configuration.yml
-        - name: {{ printf "%s-rdpgw-authelia-emptydir-volume" .Release.Name }}
+        - name: {{ printf "%s-authelia-emptydir-volume" .Release.Name }}
           emptyDir: {}
-        - name: {{ printf "%s-rdpgw-authelia-secrets-volume" .Release.Name }}
+        - name: {{ printf "%s-authelia-secrets-volume" .Release.Name }}
           secret:
-            secretName: {{ printf "%s-rdpgw" .Release.Name }}
+            secretName: {{ printf "%s-authelia" .Release.Name }}
             items:
               - key: authelia_jwt_secret_file
                 path: jwt
