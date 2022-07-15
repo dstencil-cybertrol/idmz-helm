@@ -1,4 +1,4 @@
-{{- if and .Values.guacamole.enabled .Values.certManager.enabled }}
+{{- if and .Values.guacamole.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
