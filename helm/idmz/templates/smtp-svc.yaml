@@ -4,10 +4,8 @@ kind: Service
 metadata:
   name: {{ printf "%s-smtp-relay" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
-  {{- if .Values.smtp.sharedIp }}
   annotations:
     metallb.universe.tf/allow-shared-ip: {{ tpl .Values.duo.loadBalancerIpAddress . }}
-  {{- end }}
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ tpl .Values.smtp.loadBalancerIpAddress . }}

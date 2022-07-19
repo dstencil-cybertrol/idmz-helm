@@ -1,0 +1,10 @@
+{{- if .Values.guacamole.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-dhcpd" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  cfg.yaml: |
+{{ tpl .Values.dhcpd.cfg . | indent 4 }}
+{{- end }}

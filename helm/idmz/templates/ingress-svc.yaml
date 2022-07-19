@@ -4,10 +4,8 @@ kind: Service
 metadata:
   name: {{ printf "%s-ingress" .Release.Name }}
   namespace: ingress
-  {{- if .Values.ingress.sharedIp }}
   annotations:
     metallb.universe.tf/allow-shared-ip: {{ .Values.ingress.loadBalancerIpAddress }} 
-  {{- end }}
 spec:
   selector:
     {{ .Values.ingress.selector }} 

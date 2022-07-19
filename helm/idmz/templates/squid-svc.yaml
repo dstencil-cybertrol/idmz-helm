@@ -4,16 +4,12 @@ kind: Service
 metadata:
   name: {{ printf "%s-squid" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
-  {{- if .Values.squid.sharedIp }}
   annotations:
     metallb.universe.tf/allow-shared-ip: {{ tpl .Values.squid.loadBalancerIpAddress . }}
-  {{- end }}
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ tpl .Values.squid.loadBalancerIpAddress . }}
-  {{- if not .Values.squid.sharedIp }}
-  externalTrafficPolicy: Local
-  {{- end }}
+  externalTrafficPolicy: {{ .Values.squid.externalTrafficPolicy | quote }}
   ports:
     - name: proxy
       protocol: TCP

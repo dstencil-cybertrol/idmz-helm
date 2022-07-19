@@ -1,0 +1,19 @@
+{{- if .Values.dhcpd.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-dhcpd" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.dhcpd.loadBalancerIpAddress . }}
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ tpl .Values.dhcpd.loadBalancerIpAddress . }}
+  ports:
+    - name: dhcp
+      protocol: UDP
+      port: 57
+      targetPort: 57
+  selector:
+    app: dhcpd
+{{- end }}

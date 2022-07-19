@@ -31,7 +31,6 @@ ingress:
   # This is configured under each service and can be overridden to use a 
   # dedicated ip address for each service.
   loadBalancerIpAddress: 1.2.3.4
-  sharedIp: true
   # When using 'microk8s enable ingress' selector should be 'name: nginx-ingress-microk8s' if installing with helm then use 'app.kubernetes.io/name: ingress-nginx'
   selector: "name: nginx-ingress-microk8s"
 
@@ -97,6 +96,61 @@ certManager:
   route53HostedZoneId: ""
   route53AccessKeyId: ""
 
+dhcpd:
+  enabled: false
+  image: alphabet5/dhcpd:latest
+  replicas: 1
+  restartPolicy: Always
+  imagePullPolicy: Always
+  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  cfg: |
+    global-options: | #Optional, gets added before the subnet config.
+      default-lease-time -1;
+      max-lease-time -1;
+      option domain-name-servers 192.168.1.1, 1.1.1.1;
+      option domain-name "domain.com";
+      next-server "192.168.1.250";
+      option bootfile-name "tmboot64.bin";
+    networks:
+    # vlan: gateway/subnet
+      2: 192.168.2.1/24
+      3: 192.168.3.1/24
+      4: 192.168.4.1/24
+      5: 192.168.5.1/24
+      6: 192.168.6.1/24
+    clients: | #circuit-id,ip
+      prsw01Gi1/0/2,192.168.2.12
+      prsw01Gi1/0/3,192.168.3.13
+      prsw01Gi1/0/4,192.168.4.14
+      prsw01Gi1/0/5,192.168.5.15
+      prsw01Gi1/0/6,192.168.6.16
+      prsw02Gi1/0/2,192.168.2.22
+      prsw02Gi1/0/3,192.168.3.23
+      prsw02Gi1/0/4,192.168.4.24
+      prsw02Gi1/0/5,192.168.5.25
+      prsw02Gi1/0/6,192.168.6.26
+    template: | #Optional. This replace the whole config template and can cause errors if it's not valid.
+      stash-agent-options true;
+      {% if global_options is not none +%}
+      {{ global_options }}
+      {% endif %}
+        shared-network network {% raw %}{{% endraw %}
+          {% for network in networks %}
+          subnet {{ network['ip'] }} netmask {{ network['netmask'] }} {% raw %}{{% endraw %}
+            option routers {{ network['gateway'] }};
+            option subnet-mask {{ network['netmask'] }};
+            option broadcast-address {{ network['broadcast'] }};
+          {% raw %}}{% endraw %}
+          {% endfor %}
+          subnet 0.0.0.0 netmask 0.0.0.0 {} #this is required so dhcpd listens on the random-assigned docker interface address.
+      {% raw %}}{% endraw %}
+      {% for client in clients %}
+      host {{ client['circuit_id_stripped'] }} {% raw %}{{% endraw %}
+        host-identifier option agent.circuit-id "{{ client['circuit_id'] }}";
+        fixed-address {{ client['ip'] }};
+      {% raw %}}{% endraw %}
+      {% endfor %}
+
 squid:
   enabled: false
   image: alphabet5/squid:latest
@@ -104,12 +158,7 @@ squid:
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
-  # If squid.sharedIp is set to true, you cannot use src based acls in the squid config.
-  # If the ip address is shared, the pod will only see communication from the IP address
-  # of the node that it is running on.
-  # If squid.sharedIp is set to false, externalTrafficPolicy will be set to Local.
-  # See https://metallb.universe.tf/usage/ for more details.
-  sharedIp: true
+  externalTrafficPolicy: Cluster
   squidPort: 3128
   # squid.whitelists will be mapped to files under /whitelists in the squid container.
   # These files can then be used within the squid.conf for building acls.
@@ -224,8 +273,6 @@ dnsmasq:
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
-  # dnsmasq.sharedIp needs to be set to true for both TCP and UDP dns queries to work.
-  sharedIp: true
   # dnsmasq.args are extra arguments to pass to the dnsmasq service.
   # Example: --server=[/[<domain>]/[domain/]][<ipaddr>[#<port>]][@<interface>][@<source-ip>[#<port>]]
   # See the dnsmasq man page for more details.
@@ -245,7 +292,6 @@ smtp:
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
-  sharedIp: true
   smtpPort: 25
   relayNetworks: 0.0.0.0/0
   type: gmail # gmail or smarthost
@@ -268,7 +314,6 @@ duo:
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
-  sharedIp: true
   duoAdHost: '{{ .Values.global.baseDomain }}'
   duoAdUser: DuoUser
   duoAdSearchDn: 'CN=Users,{{ .Values.global.ldapBaseDn }}'
