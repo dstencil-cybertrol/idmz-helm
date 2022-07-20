@@ -39,12 +39,18 @@ rwp:
   # Note: If you are using a cluster-issuer, you should change the defaultAnnotations to 'cert-manager.io/cluster-issuer: {{ printf "%s-cert-manager" .Release.Name }}'
   defaultAnnotations: |
     kubernetes.io/ingress.class: public
+    {{- if eq .Values.certManager.kind "ClusterIssuer" }}
+    {{- if .Values.certManager.enabled }}
+    cert-manager.io/cluster-issuer: {{ printf "%s-cert-manager" .Release.Name }}
+    {{- else }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.name | quote }}
+    {{- end }}
+    {{- else if eq .Values.certManager.kind "Issuer" }}
     {{- if .Values.certManager.enabled }}
     cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
-    {{- else if eq .Values.certManager.kind "ClusterIssuer" }}
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.name | quote }}
-    {{- else if eq .Values.certManager.kind "Issuer" }}
+    {{- else }}
     cert-manager.io/issuer: {{ .Values.certManager.name | quote }}
+    {{- end }}
     {{- end }}
   rules: []
     ## Example Configuration:

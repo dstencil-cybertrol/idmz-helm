@@ -21,12 +21,18 @@ metadata:
     # nginx.ingress.kubernetes.io/session-cookie-max-age: "36000"
     # nginx.ingress.kubernetes.io/session-cookie-expires: "36000"
     # nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
+    {{- if eq .Values.certManager.kind "ClusterIssuer" }}
+    {{- if .Values.certManager.enabled }}
+    cert-manager.io/cluster-issuer: {{ printf "%s-cert-manager" .Release.Name }}
+    {{- else }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.name | quote }}
+    {{- end }}
+    {{- else if eq .Values.certManager.kind "Issuer" }}
     {{- if .Values.certManager.enabled }}
     cert-manager.io/issuer: {{ printf "%s-cert-manager" .Release.Name }}
-    {{- else if eq .Values.certManager.kind "ClusterIssuer" }}
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.name | quote }}
-    {{- else if eq .Values.certManager.kind "Issuer" }}
+    {{- else }}
     cert-manager.io/issuer: {{ .Values.certManager.name | quote }}
+    {{- end }}
     {{- end }}
 spec:
   rules:
