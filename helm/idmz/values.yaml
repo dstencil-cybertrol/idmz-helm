@@ -499,7 +499,7 @@ rdpgw:
       # Verifies if the ip used to connect to download the rdp file equals from where the connection is opened.
       VerifyClientIp: false 
 authelia:
-  enabled: true
+  enabled: false
   image: authelia/authelia:latest
   replicas: 1
   restartPolicy: Always
