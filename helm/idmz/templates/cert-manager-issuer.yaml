@@ -3,7 +3,11 @@ apiVersion: cert-manager.io/v1
 kind: {{ .Values.certManager.kind }}
 metadata:
   name: {{ printf "%s-cert-manager" .Release.Name }}
+  {{- if eq .Values.certManager.kind "ClusterIssuer" }}
+  namespace: cert-manager
+  {{- else if eq .Values.certManager.kind "Issuer" }}
   namespace: {{ $.Release.Namespace | quote }}
+  {{- end }}
 spec:
   acme:
     email: {{ .Values.certManager.email }}
