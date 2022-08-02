@@ -70,6 +70,10 @@ spec:
             - name: AUTHELIA_SESSION_REDIS_PASSWORD_FILE
               value: /app/secrets/redis
             {{- end }}
+            {{- if .Values.authelia.secrets.session }}
+            - name: AUTHELIA_SESSION_SECRET
+              value: /app/secrets/session
+            {{- end }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER
               value: {{ tpl .Values.authelia.ldapUser . }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_URL
@@ -135,5 +139,9 @@ spec:
               {{- if .Values.authelia.secrets.redis }}
               - key: authelia_session_redis_password_secret_file
                 path: redis
+              {{- end }}
+              {{- if .Values.authelia.secrets.session }}
+              - key: authelia_session_secret_file
+                path: session
               {{- end }}
 {{- end }}
