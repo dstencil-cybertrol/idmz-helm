@@ -534,7 +534,8 @@ authelia:
       level: debug
 
     authentication_backend:
-      disable_reset_password: true
+      password_reset:
+        disable: true
       refresh_interval: 5m
       ldap:
         implementation: custom
