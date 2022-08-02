@@ -517,6 +517,7 @@ authelia:
     backendLdapPassword: "" # # Password for the ldap backend.
     issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia rsa generate --dir /keys`
     hmac: "" # random string that gets hashed with sha256 to sign the jwt.
+    redis: "" # Password for redis connection. Not used if blank.
   ldapUrl: "ldap://{{ .Values.global.baseDomain }}"
   ldapBaseDn: "{{ .Values.global.ldapBaseDn }}"
   ldapUser: "CN=autheliaUser,CN=Users,{{ .Values.global.ldapBaseDn }}" # CN=username,CN=Users,DC=domain,DC=com

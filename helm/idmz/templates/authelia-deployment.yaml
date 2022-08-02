@@ -66,6 +66,10 @@ spec:
               value: /app/secrets/issuer
             - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
               value: /app/secrets/hmac
+            {{- if .Values.authelia.secrets.redis }}
+            - name: AUTHELIA_SESSION_REDIS_PASSWORD_FILE
+              value: /app/secrets/redis
+            {{- end }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER
               value: {{ tpl .Values.authelia.ldapUser . }}
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_URL
@@ -128,4 +132,8 @@ spec:
                 path: issuer
               - key: authelia_identity_providers_oidc_hmac_secret_file
                 path: hmac
+              {{- if .Values.authelia.secrets.redis }}
+              - key: authelia_session_redis_password_secret_file
+                path: redis
+              {{- end }}
 {{- end }}
