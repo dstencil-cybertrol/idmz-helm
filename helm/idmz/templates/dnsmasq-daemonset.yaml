@@ -1,33 +1,26 @@
-{{- if .Values.dhcpd.enabled }}
+{{- if .Values.dnsmasq.enabled }}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: {{ printf "%s-dhcpd" .Release.Name }}
+  name: {{ printf "%s-dnsmasq" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ .Values.dhcpd.replicas }}
+  replicas: {{ .Values.dnsmasq.replicas }}
   selector:
     matchLabels:
-      app: dhcpd
+      app: dnsmasq
   template:
     metadata:
       labels:
-        app: dhcpd
+        app: dnsmasq
     spec:
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app: dhcpd
-      restartPolicy: {{ .Values.dhcpd.restartPolicy  | quote }}
+      restartPolicy: {{ .Values.dnsmasq.restartPolicy  | quote }}
       containers:
-        - name: {{ printf "%s-dhcpd" .Release.Name }}
-          image: {{ .Values.dhcpd.image }}
-          imagePullPolicy: {{ .Values.dhcpd.imagePullPolicy  | quote }}
+        - name: {{ printf "%s-dnsmasq" .Release.Name }}
+          image: {{ .Values.dnsmasq.image }}
+          imagePullPolicy: {{ .Values.dnsmasq.imagePullPolicy  | quote }}
           args:
-            {{- range .Values.dhcpd.args }}
+            {{- range .Values.dnsmasq.args }}
             - {{ . | quote }}
             {{- end }}
           ports:

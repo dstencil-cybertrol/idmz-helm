@@ -1,0 +1,41 @@
+{{- if .Values.dhcpd.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ printf "%s-dhcpd" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.dhcpd.replicas }}
+  selector:
+    matchLabels:
+      app: dhcpd
+  template:
+    metadata:
+      labels:
+        app: dhcpd
+    spec:
+      restartPolicy: {{ .Values.dhcpd.restartPolicy  | quote }}
+      containers:
+        - name: {{ printf "%s-dhcpd" .Release.Name }}
+          image: {{ .Values.dhcpd.image }}
+          imagePullPolicy: {{ .Values.dhcpd.imagePullPolicy  | quote }}
+          args:
+            {{- range .Values.dhcpd.args }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 53
+              protocol: UDP
+          readinessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 20
+{{- end }}

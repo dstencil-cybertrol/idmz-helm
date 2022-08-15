@@ -1,6 +1,6 @@
 apiVersion: v2
 name: idmz
-version: "0.0.23-alpha.111"
+version: "0.0.23-alpha.112"
 description: Helm chart for common IDMZ applications.
 type: application
 keywords:
@@ -12,4 +12,6 @@ sources:
 maintainers:
   - name: alphabet5
     url: https://github.com/alphabet5
+  - name: cybertrol-engineering
+    url: https://github.com/cybertrol-engineering
 deprecated: false

@@ -105,7 +105,6 @@ certManager:
 dhcpd:
   enabled: false
   image: alphabet5/dhcpd:latest
-  replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
@@ -160,7 +159,6 @@ dhcpd:
 squid:
   enabled: false
   image: alphabet5/squid:latest
-  replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
@@ -275,7 +273,6 @@ squid:
 dnsmasq:
   enabled: false
   image: alphabet5/dnsmasq:latest
-  replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
@@ -294,7 +291,6 @@ smtp:
   secrets:
     nextHopPassword: ""
   image: namshi/smtp:latest
-  replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
@@ -316,7 +312,6 @@ duo:
     duoRadiusSecret: ""
     duoSecretKey: ""
   image: alphabet5/duoauthproxy:latest
-  replicas: 1
   restartPolicy: Always
   imagePullPolicy: Always
   loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
@@ -333,9 +328,8 @@ guacamole:
     mysqlRootPassword:
     ldapBindPassword:
   image: guacamole/guacamole:1.4.0
-  replicas: 1
   restartPolicy: Always
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   dnsName: "guacamole.{{ .Values.global.publicBaseDomain }}" # Example: guacamole.testdomain.com
   ldapBindUser: "CN=guacuser,CN=Users,{{ .Values.global.ldapBaseDn }}"
   debug: false
@@ -352,7 +346,6 @@ guacamole:
     ldap-username-attribute: samAccountName
   guacd:
     image: guacamole/guacd:1.4.0
-    replicas: 1
     restartPolicy: Always
     imagePullPolicy: Always
   init:
@@ -361,7 +354,6 @@ guacamole:
   sql:
     enabled: true
     image: mariadb:latest
-    replicas: 1
     restartPolicy: Always
     imagePullPolicy: Always
     mysqlUser: guacuser
@@ -369,10 +361,9 @@ guacamole:
   users:
     enabled: true
     image: alphabet5/guacamole-users:latest
-    replicas: 1
     restartPolicy: Always
     imagePullPolicy: Always
-    debug: true
+    debug: false
     # If guacamole.users.autoConnectionDns is set to true, 
     # the dns name of the computer will be used. If it is 
     # set to false, the ip address (resolved using 
@@ -518,7 +509,7 @@ authelia:
     issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia rsa generate --dir /keys`
     hmac: "" # random string that gets hashed with sha256 to sign the jwt.
     redis: "" # Password for redis connection. Not used if blank.
-    session: "" # Required if redis is used.
+    session: "" # Required if redis is used. Random 64 an charaters.
   ldapUrl: "ldap://{{ .Values.global.baseDomain }}"
   ldapBaseDn: "{{ .Values.global.ldapBaseDn }}"
   ldapUser: "CN=autheliaUser,CN=Users,{{ .Values.global.ldapBaseDn }}" # CN=username,CN=Users,DC=domain,DC=com
