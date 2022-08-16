@@ -5,7 +5,6 @@ metadata:
   name: {{ printf "%s-duo-auth-proxy" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ .Values.duo.replicas }}
   selector:
     matchLabels:
       app: duo-auth-proxy

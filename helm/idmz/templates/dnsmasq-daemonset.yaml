@@ -5,7 +5,6 @@ metadata:
   name: {{ printf "%s-dnsmasq" .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: {{ .Values.dnsmasq.replicas }}
   selector:
     matchLabels:
       app: dnsmasq
