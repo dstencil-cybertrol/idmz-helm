@@ -1,9 +1,8 @@
 # Some values in this values.yaml file are able to be templated using other values. 
 # The default values under global for example.
-# loadBalancerIpAddress under services other than 'ingress' are able to be templated
-# By default (on services other than ingress) the loadBalancerIpAddress is set to
-# "{{ .Values.ingress.loadBalancerIpAddress }}"
-
+# loadBalancerIpAddress are able to be templated
+# By default the loadBalancerIpAddress is set to
+# "{{ .Values.global.loadBalancerIpAddress }}"
 global:
   # These global values are used in various places throughout the values.yaml file. 
   # They can be overriden in the respective app's config, or can be set here.
@@ -20,19 +19,19 @@ global:
   baseDomain: "" # testdomain.local
   ldapBaseDn: "" # DC=testdomain,DC=local
   publicBaseDomain: "" # testdomain.com
+  # By default all services will share the global loadBalancerIpAddress.
+  # This is configured under each service and can be overridden to use a 
+  # dedicated ip address for each service.
+  loadBalancerIpAddress: "" # i.e. 192.0.2.14
 
 ingress:
   # ingress is used to serve http traffic to various backends.
   # It is used by guacamole, rdpgw (and authelia, used for the rdpgw.)
   # If ingress is disabled, the ingress service must be created externally.
   enabled: false
-  # By default all services will share the ingress loadBalancerIpAddress.
-  # This will limit src based acls for squid. 
-  # This is configured under each service and can be overridden to use a 
-  # dedicated ip address for each service.
-  loadBalancerIpAddress: 1.2.3.4
+  loadBalancerIpAddress: "{{ .Values.global.loadBalancerIpAddress }}"
   # When using 'microk8s enable ingress' selector should be 'name: nginx-ingress-microk8s' if installing with helm then use 'app.kubernetes.io/name: ingress-nginx'
-  selector: "name: nginx-ingress-microk8s"
+  selector: "app.kubernetes.io/name: ingress-nginx"
 
 rwp:
   enabled: false
@@ -107,7 +106,7 @@ dhcpd:
   image: alphabet5/dhcpd:latest
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  loadBalancerIpAddress: "{{ .Values.global.loadBalancerIpAddress }}"
   cfg: |
     global-options: | #Optional, gets added before the subnet config.
       default-lease-time -1;
@@ -161,7 +160,7 @@ squid:
   image: alphabet5/squid:latest
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  loadBalancerIpAddress: "{{ .Values.global.loadBalancerIpAddress }}"
   externalTrafficPolicy: Cluster
   squidPort: 3128
   # squid.whitelists will be mapped to files under /whitelists in the squid container.
@@ -275,7 +274,7 @@ dnsmasq:
   image: alphabet5/dnsmasq:latest
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  loadBalancerIpAddress: "{{ .Values.global.loadBalancerIpAddress }}"
   # dnsmasq.args are extra arguments to pass to the dnsmasq service.
   # Example: --server=[/[<domain>]/[domain/]][<ipaddr>[#<port>]][@<interface>][@<source-ip>[#<port>]]
   # See the dnsmasq man page for more details.
@@ -293,7 +292,7 @@ smtp:
   image: namshi/smtp:latest
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  loadBalancerIpAddress: "{{ .Values.global.loadBalancerIpAddress }}"
   smtpPort: 25
   relayNetworks: 0.0.0.0/0
   type: gmail # gmail or smarthost
@@ -314,7 +313,7 @@ duo:
   image: alphabet5/duoauthproxy:latest
   restartPolicy: Always
   imagePullPolicy: Always
-  loadBalancerIpAddress: "{{ .Values.ingress.loadBalancerIpAddress }}"
+  loadBalancerIpAddress: "{{ .Values.global.loadBalancerIpAddress }}"
   duoAdHost: '{{ .Values.global.baseDomain }}'
   duoAdUser: DuoUser
   duoAdSearchDn: 'CN=Users,{{ .Values.global.ldapBaseDn }}'

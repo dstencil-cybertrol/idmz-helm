@@ -5,7 +5,7 @@ metadata:
   name: {{ printf "%s-ingress" .Release.Name }}
   namespace: ingress
   annotations:
-    metallb.universe.tf/allow-shared-ip: {{ .Values.ingress.loadBalancerIpAddress }} 
+    metallb.universe.tf/allow-shared-ip: {{ tpl .Values.ingress.loadBalancerIpAddress . }}
 spec:
   selector:
     {{ .Values.ingress.selector }} 
@@ -19,5 +19,5 @@ spec:
       port: 443
       targetPort: 443
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.ingress.loadBalancerIpAddress }}
+  loadBalancerIP: {{ tpl .Values.ingress.loadBalancerIpAddress . }}
 {{- end }}
