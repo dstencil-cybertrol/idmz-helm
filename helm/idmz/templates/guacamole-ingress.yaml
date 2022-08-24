@@ -7,7 +7,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "public"
     nginx.ingress.kubernetes.io/app-root: "/guacamole/"
-    nginx.ingress.kubernetes.io/proxy-body-size: 2048m
+    nginx.ingress.kubernetes.io/proxy-body-size: 10000m
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/session-cookie-name: {{ printf "%s-guacamole" .Release.Name }}
     nginx.ingress.kubernetes.io/affinity-mode: persistent
