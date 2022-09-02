@@ -232,6 +232,7 @@ squid:
       github.com
       objects.githubusercontent.com
       .quay.io
+      get.k3s.io
   cfg: |
     #Setup logging
     logfile_rotate 0
@@ -505,7 +506,7 @@ authelia:
     jwtSecret: "" # Random 32 characters.
     storageEncryptionKey: "" # Random 64 characters.
     backendLdapPassword: "" # # Password for the ldap backend.
-    issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia rsa generate --dir /keys`
+    issuer: "" # pem encoded secret `docker run -u "$(id -u):$(id -g)" -v "$(pwd)":/keys authelia/authelia:latest authelia crypto pair rsa generate --bits 4096 --directory /keys` (Note: this command might change, and up to date documentation can be found here: https://www.authelia.com/configuration/miscellaneous/guides/#generating-an-rsa-keypair)
     hmac: "" # random string that gets hashed with sha256 to sign the jwt.
     redis: "" # Password for redis connection. Not used if blank.
     session: "" # Required if redis is used. Random 64 an charaters.

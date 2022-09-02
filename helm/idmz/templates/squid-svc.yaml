@@ -15,6 +15,8 @@ spec:
       protocol: TCP
       port: {{ .Values.squid.squidPort }}
       targetPort: 3128
+  topologyKeys:
+    - "kubernetes.io/hostname"
   selector:
     app: squid
 {{- end }}
