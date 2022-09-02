@@ -6,6 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   annotations:
     metallb.universe.tf/allow-shared-ip: {{ tpl .Values.squid.loadBalancerIpAddress . }}
+    service.kubernetes.io/topology-aware-hints: auto
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ tpl .Values.squid.loadBalancerIpAddress . }}
@@ -15,8 +16,6 @@ spec:
       protocol: TCP
       port: {{ .Values.squid.squidPort }}
       targetPort: 3128
-  topologyKeys:
-    - "kubernetes.io/hostname"
   selector:
     app: squid
 {{- end }}
