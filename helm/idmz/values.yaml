@@ -233,6 +233,7 @@ squid:
       objects.githubusercontent.com
       .quay.io
       get.k3s.io
+      cybertrolengineering.azurecr.io
   cfg: |
     #Setup logging
     logfile_rotate 0
