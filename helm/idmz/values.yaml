@@ -236,6 +236,7 @@ squid:
       cybertrolengineering.azurecr.io
       registry.k8s.io
       .blob.core.windows.net
+      acme.zerossl.com
   cfg: |
     #Setup logging
     logfile_rotate 0
