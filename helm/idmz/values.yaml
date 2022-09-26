@@ -237,6 +237,7 @@ squid:
       registry.k8s.io
       .blob.core.windows.net
       acme.zerossl.com
+      route53.amazonaws.com
   cfg: |
     #Setup logging
     logfile_rotate 0
