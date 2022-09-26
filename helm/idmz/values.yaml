@@ -234,6 +234,7 @@ squid:
       .quay.io
       get.k3s.io
       cybertrolengineering.azurecr.io
+      registry.k8s.io
   cfg: |
     #Setup logging
     logfile_rotate 0
