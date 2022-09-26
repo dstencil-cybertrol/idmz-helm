@@ -235,6 +235,7 @@ squid:
       get.k3s.io
       cybertrolengineering.azurecr.io
       registry.k8s.io
+      .blob.core.windows.net
   cfg: |
     #Setup logging
     logfile_rotate 0
